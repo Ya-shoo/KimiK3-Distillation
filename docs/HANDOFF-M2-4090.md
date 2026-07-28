@@ -20,10 +20,10 @@ conceptual training choices to the owner. Offer to take pieces over only when as
 ---
 
 ## 0. Get the code + data onto this box
-There are **no commits yet** on the dev Mac. Before cloning here, on the **Mac**:
+Already committed + pushed to a **private** repo. On this box:
 ```bash
-git add -A && git commit -m "M0/M1: data pipeline + K3 teacher labeling + M2 plumbing"
-git remote add origin <your-remote> && git push -u origin main
+git clone https://github.com/Ya-shoo/KimiK3-Distillation.git
+cd KimiK3-Distillation
 ```
 The K3-labeled set is **git-tracked on purpose** (it cost ~$16 and isn't cheaply regenerable):
 `data/label/labeled.jsonl`, `data/label/subsample.parquet`, `data/label/targets/*` all travel with
