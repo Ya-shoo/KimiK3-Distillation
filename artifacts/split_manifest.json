@@ -1,0 +1,26 @@
+{
+  "seed": 42,
+  "source_rows": 23802,
+  "fractions": {
+    "train": 0.7,
+    "val": 0.1,
+    "test": 0.2
+  },
+  "splits": {
+    "train": {
+      "rows": 16660,
+      "hash": "6971cbea8c06de68",
+      "n_classes": 27
+    },
+    "val": {
+      "rows": 2381,
+      "hash": "2b0124f85e7c86fd",
+      "n_classes": 27
+    },
+    "test": {
+      "rows": 4761,
+      "hash": "d7e24e9e99a17c62",
+      "n_classes": 27
+    }
+  }
+}

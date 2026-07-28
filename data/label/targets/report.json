@@ -1,0 +1,106 @@
+{
+  "labeled_rows": 2997,
+  "errors": 0,
+  "gold_match_kept": 2861,
+  "gold_mismatch_dropped": 136,
+  "keep_rate": 0.9546,
+  "targets": {
+    "recipe_a": 5722,
+    "recipe_b": 2861,
+    "ablation": 2861
+  },
+  "top_dropped_classes": [
+    [
+      "delivery_period",
+      51
+    ],
+    [
+      "switch_account",
+      19
+    ],
+    [
+      "check_invoice",
+      17
+    ],
+    [
+      "create_account",
+      8
+    ],
+    [
+      "review",
+      6
+    ],
+    [
+      "get_refund",
+      5
+    ],
+    [
+      "set_up_shipping_address",
+      5
+    ],
+    [
+      "delivery_options",
+      4
+    ],
+    [
+      "payment_issue",
+      4
+    ],
+    [
+      "track_refund",
+      3
+    ]
+  ],
+  "top_confusions_gold_to_pred": [
+    {
+      "gold": "delivery_period",
+      "pred": "track_order",
+      "n": 51
+    },
+    {
+      "gold": "check_invoice",
+      "pred": "get_invoice",
+      "n": 17
+    },
+    {
+      "gold": "switch_account",
+      "pred": "edit_account",
+      "n": 10
+    },
+    {
+      "gold": "switch_account",
+      "pred": "contact_customer_service",
+      "n": 7
+    },
+    {
+      "gold": "review",
+      "pred": "contact_customer_service",
+      "n": 6
+    },
+    {
+      "gold": "create_account",
+      "pred": "registration_problems",
+      "n": 5
+    },
+    {
+      "gold": "set_up_shipping_address",
+      "pred": "change_shipping_address",
+      "n": 5
+    },
+    {
+      "gold": "delivery_options",
+      "pred": "place_order",
+      "n": 4
+    },
+    {
+      "gold": "payment_issue",
+      "pred": "contact_customer_service",
+      "n": 4
+    },
+    {
+      "gold": "create_account",
+      "pred": "switch_account",
+      "n": 3
+    }
+  ]
+}

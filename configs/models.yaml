@@ -1,0 +1,26 @@
+# Pinned model identifiers + eval settings.
+# Log exact versions + dates for reproducibility (the benchmark's credibility rests on this).
+
+teacher:
+  kimi-k3:
+    # Kimi K3 (launched 2026-07-16): 2.8T MoE, 1M ctx, reasoning model. List price $3/$15 per 1M.
+    # Provider chosen via .env. Moonshot first-party is waitlisted for new accounts ->
+    # use Together or OpenRouter (both instant, OpenAI-compatible, same price).
+    provider: openrouter
+    model: "moonshotai/kimi-k3"   # OpenRouter id; Together uses moonshotai/Kimi-K3
+    api_key_env: TEACHER_API_KEY
+    base_url_env: TEACHER_BASE_URL
+
+panel:
+  anthropic-flagship:
+    provider: claude-code-cli        # runs via `claude -p` on the Claude Code subscription
+    model: "claude-opus-4-8"         # confirm the flagship id to pin at eval time
+  # Additional panel entries (OpenAI GPT-5.6 / Gemini flagship / open peers such as
+  # Kimi K2.x / DeepSeek / Qwen) are TBD — pending the panel-access decision at M3.
+
+student:
+  qwen3-4b:
+    base_model: "Qwen/Qwen3-4B"
+    method: qlora
+    train_box: rtx-4090
+  # optional secondary: qwen3-1.7b for an accuracy-vs-size frontier of your own

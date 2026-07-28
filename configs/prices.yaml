@@ -1,0 +1,22 @@
+# Pricing snapshot for the cost axis of the money-chart. USD per 1M tokens.
+snapshot_date: "2026-07-27"
+
+models:
+  kimi-k3:
+    provider: openrouter        # same list price on OpenRouter / Together / Moonshot
+    input: 3.0
+    output: 15.0
+    cached_input: 0.30          # 90% off cache-hit input (our static system prompt caches well)
+    note: "Reasoning model — internal thinking tokens are billed as OUTPUT ($15/M)."
+  anthropic-flagship:
+    provider: claude-code-subscription
+    input: null                 # report LIST API price for a fair cost axis...
+    output: null                # ...even though marginal cost via the sub is ~0
+    note: "Runs via Claude Code sub. Cost axis uses list API price so it's comparable."
+  # Add OpenAI / Gemini / open-peer entries here once the panel is finalized (M3).
+
+student-local:
+  provider: rtx-4090
+  input: 0.0
+  output: 0.0
+  note: "QLoRA on owned GPU; marginal cost approximated as electricity (~0)."
