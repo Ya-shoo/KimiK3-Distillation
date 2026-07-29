@@ -62,6 +62,10 @@ def main() -> None:
     ap.add_argument("--runs", nargs="+", required=True, help="run dir names under runs/")
     ap.add_argument("--notes", default=None,
                     help="JSON file of curated prose to merge: adjustment_changelog, caveats, seeds note")
+    ap.add_argument("--groups", default=None,
+                    help="JSON file of seed families: {family: {anchor: run, members: [runs...]}}. "
+                         "Each member's val macro-F1 is read AT THE ANCHOR'S BEST EPOCH and the "
+                         "family gets mean +/- sample-sigma (the paper's error bars).")
     args = ap.parse_args()
 
     c = cfg(args.dataset)
@@ -111,8 +115,35 @@ def main() -> None:
     findings["seed_variance"] = {
         "seeds": sorted(seeds_seen),
         "n_seeds": len(seeds_seen),
-        "mean_sigma": None if len(seeds_seen) < 2 else "computed once multi-seed runs exist",
     }
+    if args.groups:
+        import statistics
+        families = {}
+        for fam, g in json.loads(Path(args.groups).read_text(encoding="utf-8")).items():
+            anchor = json.loads((REPO_ROOT / "runs" / g["anchor"] / "epoch_scores.json").read_text())
+            epoch = anchor["best_epoch"]
+            vals, oos_vals = {}, {}
+            for m in g["members"]:
+                sc = json.loads((REPO_ROOT / "runs" / m / "epoch_scores.json").read_text())
+                row = next((e for e in sc["epochs"] if e["epoch"] == epoch), None)
+                if row is None:
+                    print(f"[groups] {fam}: {m} has no epoch {epoch} — excluded")
+                    continue
+                vals[m] = round(row["macro_f1"], 4)
+                if "oos" in row:
+                    oos_vals[m] = row["oos"]["recall"]
+            fam_out = {
+                "epoch": epoch,
+                "n": len(vals),
+                "macro_f1_mean": round(statistics.mean(vals.values()), 4) if vals else None,
+                "macro_f1_sigma": round(statistics.stdev(vals.values()), 4) if len(vals) > 1 else None,
+                "per_run": vals,
+            }
+            if oos_vals:
+                fam_out["oos_recall_mean"] = round(statistics.mean(oos_vals.values()), 4)
+                fam_out["oos_recall_per_run"] = oos_vals
+            families[fam] = fam_out
+        findings["seed_variance"]["families"] = families
     if args.notes:
         findings.update(json.loads(Path(args.notes).read_text(encoding="utf-8")))
 

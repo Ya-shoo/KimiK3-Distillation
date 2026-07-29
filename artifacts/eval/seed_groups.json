@@ -1,0 +1,6 @@
+{
+  "recipe_a": {"anchor": "bitext_recipe_a_s42v2", "members": ["bitext_recipe_a_s42v2", "bitext_recipe_a_s1337", "bitext_recipe_a_s2024"]},
+  "ablation": {"anchor": "ablation", "members": ["ablation", "bitext_ablation_s1337", "bitext_ablation_s2024"]},
+  "recipe_b": {"anchor": "recipe_b", "members": ["recipe_b", "bitext_recipe_b_s1337", "bitext_recipe_b_s2024"]},
+  "recipe_a_sawtooth_legacy": {"anchor": "recipe_a", "members": ["recipe_a"]}
+}
