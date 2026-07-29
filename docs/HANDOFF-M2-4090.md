@@ -130,4 +130,21 @@ trained adapter ──► inference runner (val_eval) ──► preds.jsonl ─�
 - `src/triage_distill/train/prepare.py` — data prep + the student `SYS_*` prompts (owner's knob).
 - `src/triage_distill/eval/score.py` — the scorer (students now, panel in M3).
 - `data/label/targets/` — gold-gated A/B/ablation targets (committed). `data/label/labeled.jsonl` — full K3 output incl. archived reasoning traces.
-- Project memory: `project-overview`, `collaboration-model`, `m1-teacher-labeling`.
+- *(The Claude project memory that informed this — `project-overview` / `collaboration-model` / `m1-teacher-labeling` — lives on the **dev Mac**, not in the repo. Everything load-bearing from it is inlined above, so this doc stands alone.)*
+
+## 10. Sending results back to the dev Mac (GitHub round-trip)
+The Mac continues to **M3** (frontier panel + accuracy-vs-cost chart) from your **numbers**, not your
+weights — it has no CUDA and can't run the student. So push back **code + eval results**, and keep
+**weights out of git**:
+
+- **Weights/adapters do NOT go through git** — `.gitignore` already blocks `outputs/`, `checkpoints/`,
+  `*.safetensors`, `*.gguf`, `*.bin`. To share the weights, push them to **Hugging Face** (SPEC's plan:
+  model card + weights); otherwise they can stay on the 4090. The Mac doesn't need them for M3.
+- **DO commit + push:** your `train.py` + inference-runner source, and the eval outputs the Mac needs.
+  Write eval outputs to the **git-tracked** `artifacts/eval/` dir — e.g. `score.py --out
+  artifacts/eval/recipe_b.json`, plus each run's `preds.jsonl`. (`artifacts/` is tracked; `data/` mostly isn't.)
+- From the 4090: `git add -A && git commit -m "M2: student training + val scores" && git push`
+- Back on the Mac: `git pull` → the training code + val macro-F1 numbers land, and we pick up M3.
+
+**Discipline:** always `git pull` before starting on either box so the two never diverge. Linear `main`
+is fine for a solo two-box flow; use a branch + PR if you prefer a review step.
