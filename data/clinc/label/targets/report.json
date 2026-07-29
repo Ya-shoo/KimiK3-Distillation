@@ -1,0 +1,106 @@
+{
+  "labeled_rows": 6050,
+  "errors": 10,
+  "gold_match_kept": 5704,
+  "gold_mismatch_dropped": 336,
+  "keep_rate": 0.9444,
+  "targets": {
+    "recipe_a": 11408,
+    "recipe_b": 5704,
+    "ablation": 5704
+  },
+  "top_dropped_classes": [
+    [
+      "reminder_update",
+      40
+    ],
+    [
+      "distance",
+      30
+    ],
+    [
+      "insurance_change",
+      20
+    ],
+    [
+      "maybe",
+      16
+    ],
+    [
+      "next_holiday",
+      14
+    ],
+    [
+      "time",
+      11
+    ],
+    [
+      "meeting_schedule",
+      10
+    ],
+    [
+      "cancel",
+      9
+    ],
+    [
+      "improve_credit_score",
+      7
+    ],
+    [
+      "smart_home",
+      7
+    ]
+  ],
+  "top_confusions_gold_to_pred": [
+    {
+      "gold": "reminder_update",
+      "pred": "reminder",
+      "n": 39
+    },
+    {
+      "gold": "distance",
+      "pred": "directions",
+      "n": 25
+    },
+    {
+      "gold": "insurance_change",
+      "pred": "insurance",
+      "n": 20
+    },
+    {
+      "gold": "maybe",
+      "pred": "oos",
+      "n": 16
+    },
+    {
+      "gold": "time",
+      "pred": "timezone",
+      "n": 11
+    },
+    {
+      "gold": "meeting_schedule",
+      "pred": "calendar",
+      "n": 10
+    },
+    {
+      "gold": "improve_credit_score",
+      "pred": "credit_score",
+      "n": 7
+    },
+    {
+      "gold": "next_holiday",
+      "pred": "pto_request_status",
+      "n": 7
+    },
+    {
+      "gold": "w2",
+      "pred": "taxes",
+      "n": 6
+    },
+    {
+      "gold": "greeting",
+      "pred": "oos",
+      "n": 5
+    }
+  ]
+}

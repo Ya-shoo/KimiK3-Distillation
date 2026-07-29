@@ -1,5 +1,5 @@
 # Pricing snapshot for the cost axis of the money-chart. USD per 1M tokens.
-snapshot_date: "2026-07-27"
+snapshot_date: "2026-07-28"   # OpenRouter live prices for the finalized M3 panel
 
 models:
   kimi-k3:
@@ -8,12 +8,34 @@ models:
     output: 15.0
     cached_input: 0.30          # 90% off cache-hit input (our static system prompt caches well)
     note: "Reasoning model — internal thinking tokens are billed as OUTPUT ($15/M)."
-  anthropic-flagship:
+  anthropic-fable-5:
     provider: claude-code-subscription
     input: null                 # report LIST API price for a fair cost axis...
     output: null                # ...even though marginal cost via the sub is ~0
-    note: "Runs via Claude Code sub. Cost axis uses list API price so it's comparable."
-  # Add OpenAI / Gemini / open-peer entries here once the panel is finalized (M3).
+    note: "Fable 5 via Claude Code sub. Cost axis uses list API price so it's comparable."
+  gpt-5.6-sol:
+    provider: openrouter
+    input: 5.0
+    output: 30.0
+    note: "Premium GPT-5.6 tier; Terra (1.25/7.5) or Luna (0.5/3) are cheaper alternates."
+  gemini-3-flash:
+    provider: openrouter
+    input: 0.5
+    output: 3.0
+    note: "google/gemini-3-flash-preview"
+  haiku-4.5:
+    provider: claude-code-subscription   # free to run via sub; list price shown for the cost axis
+    input: 1.0
+    output: 5.0
+  gpt-5.6-luna:
+    provider: openrouter
+    input: 0.5
+    output: 3.0
+    note: "cheap tier of the GPT-5.6 line (efficient-tier panel entry)"
+  deepseek-v3.2:
+    provider: openrouter
+    input: 0.27
+    output: 0.4
 
 student-local:
   provider: rtx-4090

@@ -72,14 +72,17 @@ def _price_per_token() -> tuple[float, float]:
 class Teacher:
     """One K3 call per ticket → validated JSON + usage/cost."""
 
-    def __init__(self, model: str | None = None, temperature: float = 0.0, max_tokens: int | None = None):
+    def __init__(self, model: str | None = None, temperature: float = 0.0, max_tokens: int | None = None,
+                 prompt_path: Path | None = None, label_space_path: Path | None = None):
         self.base = _base_url()
         self.client = _client(self.base)
         self.model = model or _teacher_model()
         self.temperature = temperature
         self.max_tokens = max_tokens if max_tokens is not None else _max_tokens()
-        self.system_prompt = extract_system_prompt()
-        self.labels = set(load_label_space())
+        # prompt_path + label_space_path let one client serve any benchmark (see datasets.cfg);
+        # defaults keep the original Bitext behavior.
+        self.system_prompt = extract_system_prompt(prompt_path or TEACHER_MD)
+        self.labels = set(load_label_space(label_space_path))
         self._in_price, self._out_price = _price_per_token()
         # On OpenRouter, only route to providers that honor our params (response_format).
         self._extra_body = {"provider": {"require_parameters": True}} if "openrouter" in self.base else {}

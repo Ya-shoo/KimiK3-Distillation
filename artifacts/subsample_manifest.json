@@ -1,4 +1,5 @@
 {
+  "dataset": "bitext",
   "seed": 42,
   "per_class_target": 111,
   "rows": 2997,

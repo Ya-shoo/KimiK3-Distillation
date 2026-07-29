@@ -23,6 +23,17 @@ data/label/*
 data/label/targets/*
 !data/label/targets/*.jsonl
 !data/label/targets/*.json
+# Same policy for the CLINC benchmark's labeled set.
+!data/clinc/
+data/clinc/*
+!data/clinc/label/
+data/clinc/label/*
+!data/clinc/label/labeled.jsonl
+!data/clinc/label/subsample.parquet
+!data/clinc/label/targets/
+data/clinc/label/targets/*
+!data/clinc/label/targets/*.jsonl
+!data/clinc/label/targets/*.json
 
 # Model weights / large outputs
 outputs/

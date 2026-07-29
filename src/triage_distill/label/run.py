@@ -27,11 +27,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from triage_distill.datasets import cfg
 from triage_distill.models.teacher import Teacher
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SUBSAMPLE = REPO_ROOT / "data" / "label" / "subsample.parquet"
-LABELED = REPO_ROOT / "data" / "label" / "labeled.jsonl"
 
 BATCH_MAX_TOKENS = 1024  # ~5x observed completion; small OpenRouter hold, no truncation
 
@@ -72,14 +71,19 @@ def label_one(teacher: Teacher, row: pd.Series) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--dataset", default="bitext")
     ap.add_argument("--workers", type=int, default=6, help="concurrent K3 calls")
     ap.add_argument("--limit", type=int, default=None, help="only label the first N pending rows (dry run)")
     ap.add_argument("--max-tokens", type=int, default=BATCH_MAX_TOKENS)
     ap.add_argument("--restart", action="store_true", help="ignore + overwrite existing labeled.jsonl")
     args = ap.parse_args()
 
+    c = cfg(args.dataset)
+    SUBSAMPLE = c.label_dir / "subsample.parquet"
+    LABELED = c.label_dir / "labeled.jsonl"
     if not SUBSAMPLE.exists():
-        raise FileNotFoundError(f"{SUBSAMPLE} missing. Run `python -m triage_distill.data.subsample` first.")
+        raise FileNotFoundError(
+            f"{SUBSAMPLE} missing. Run `python -m triage_distill.data.subsample --dataset {args.dataset}` first.")
 
     df = pd.read_parquet(SUBSAMPLE)
     if args.restart and LABELED.exists():
@@ -94,7 +98,7 @@ def main() -> None:
         print("nothing to do.")
         return
 
-    teacher = Teacher(max_tokens=args.max_tokens)
+    teacher = Teacher(max_tokens=args.max_tokens, prompt_path=c.teacher_prompt, label_space_path=c.label_space)
     LABELED.parent.mkdir(parents=True, exist_ok=True)
     lock = threading.Lock()
     fh = LABELED.open("a")
@@ -132,7 +136,8 @@ def main() -> None:
     print(f"gold-match rate: {tally['match']}/{tally['ok']} "
           f"({tally['match'] / tally['ok']:.1%})" if tally["ok"] else "no successes")
     print(f"tokens: in {tally['in_tok']:,} / out {tally['out_tok']:,} | cost ${tally['cost']:.3f}")
-    print(f"-> {LABELED.relative_to(REPO_ROOT)} (build targets: python -m triage_distill.label.targets)")
+    print(f"-> {LABELED.relative_to(REPO_ROOT)} "
+          f"(build targets: python -m triage_distill.label.targets --dataset {args.dataset})")
 
 
 if __name__ == "__main__":

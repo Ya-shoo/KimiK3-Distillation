@@ -20,13 +20,14 @@ training-config design stays the user's surface, not baked in here.
 """
 from __future__ import annotations
 
+import argparse
 import json
 from collections import Counter
 from pathlib import Path
 
+from triage_distill.datasets import cfg
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
-LABELED = REPO_ROOT / "data" / "label" / "labeled.jsonl"
-OUT_DIR = REPO_ROOT / "data" / "label" / "targets"
 
 
 def _load(path: Path) -> list[dict]:
@@ -46,7 +47,12 @@ def _write(path: Path, rows: list[dict]) -> None:
 
 
 def main() -> None:
-    recs = _load(LABELED)
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--dataset", default="bitext")
+    args = ap.parse_args()
+    c = cfg(args.dataset)
+    OUT_DIR = c.label_dir / "targets"
+    recs = _load(c.label_dir / "labeled.jsonl")
     ok = [r for r in recs if "error" not in r]
     errors = len(recs) - len(ok)
     kept = [r for r in ok if r["gold_match"]]
@@ -89,7 +95,7 @@ def main() -> None:
                       if k not in ("top_dropped_classes", "top_confusions_gold_to_pred")}, indent=2))
     print(f"\nkept {len(kept)}/{len(ok)} ({report['keep_rate']:.1%}); dropped {len(dropped)} gold-mismatches, {errors} errors")
     if confusions:
-        print("top gold→pred disagreements (K3 vs Bitext):")
+        print("top gold→pred disagreements (K3 vs gold):")
         for (g, p), n in confusions.most_common(5):
             print(f"  {g:>24} → {p:<24} ×{n}")
     print(f"-> {OUT_DIR.relative_to(REPO_ROOT)}/ (recipe_a, recipe_b, ablation .jsonl + report.json)")

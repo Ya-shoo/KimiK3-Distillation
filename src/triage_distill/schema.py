@@ -19,16 +19,20 @@ LABEL_SPACE_PATH = REPO_ROOT / "artifacts" / "label_space.json"
 PRIORITY_LEVELS = ("low", "medium", "high", "urgent")
 
 
-@lru_cache(maxsize=1)
-def load_label_space() -> tuple[str, ...]:
-    """Return the frozen, sorted tuple of category labels."""
-    if not LABEL_SPACE_PATH.exists():
+@lru_cache(maxsize=None)
+def load_label_space(path: str | Path | None = None) -> tuple[str, ...]:
+    """Return the frozen, sorted tuple of category labels (default: Bitext).
+
+    Pass a dataset's `label_space.json` path (e.g. from `datasets.cfg(...)`) to load a
+    different benchmark's label space; no arg keeps the original Bitext behavior.
+    """
+    p = Path(path) if path else LABEL_SPACE_PATH
+    if not p.exists():
         raise FileNotFoundError(
-            f"Label space not found at {LABEL_SPACE_PATH}. "
-            "Run `uv run python -m triage_distill.data.download` first."
+            f"Label space not found at {p}. Run the dataset's build step first "
+            "(e.g. `triage_distill.data.download` for Bitext, `triage_distill.data.clinc` for CLINC)."
         )
-    data = json.loads(LABEL_SPACE_PATH.read_text())
-    return tuple(data["labels"])
+    return tuple(json.loads(p.read_text())["labels"])
 
 
 # --- Phase 1 output: category only (gold-labeled) ---------------------------

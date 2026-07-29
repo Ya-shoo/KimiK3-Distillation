@@ -20,15 +20,15 @@ inference — the eval scorer imports these same constants so they stay in locks
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
 import pandas as pd
 
+from triage_distill.datasets import cfg
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TARGETS = REPO_ROOT / "data" / "label" / "targets"
-VAL = REPO_ROOT / "data" / "splits" / "val.parquet"
-OUT_DIR = REPO_ROOT / "data" / "train"
 
 # Student inference contract (your knob — keep eval + training in sync via these).
 SYS_CLASSIFY = (
@@ -68,6 +68,13 @@ def _write(path: Path, rows: list[dict]) -> None:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--dataset", default="bitext")
+    args = ap.parse_args()
+    c = cfg(args.dataset)
+    TARGETS = c.label_dir / "targets"
+    VAL = c.splits_dir / "val.parquet"
+    OUT_DIR = c.train_dir
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     counts = {}
 

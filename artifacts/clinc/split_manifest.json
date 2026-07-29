@@ -1,0 +1,22 @@
+{
+  "seed": "native-clinc-splits",
+  "source": "https://raw.githubusercontent.com/clinc/oos-eval/master/data/data_full.json",
+  "oos_label": "oos",
+  "splits": {
+    "train": {
+      "rows": 15100,
+      "hash": "7e0b62d369bea442",
+      "n_classes": 151
+    },
+    "val": {
+      "rows": 3100,
+      "hash": "c491f6cc55dce929",
+      "n_classes": 151
+    },
+    "test": {
+      "rows": 5500,
+      "hash": "e15a61dad4fe8929",
+      "n_classes": 151
+    }
+  }
+}

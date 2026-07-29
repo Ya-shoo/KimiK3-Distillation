@@ -148,3 +148,18 @@ weights — it has no CUDA and can't run the student. So push back **code + eval
 
 **Discipline:** always `git pull` before starting on either box so the two never diverge. Linear `main`
 is fine for a solo two-box flow; use a branch + PR if you prefer a review step.
+
+## 11. Log these findings for the mini-paper (IMPORTANT)
+The end deliverable is a mini research paper + a resume artifact — see **`docs/PAPER-OUTLINE.md`**.
+As you train, **emit findings as JSON to `artifacts/<dataset>/eval/`** (not just terminal scrollback),
+because the paper and charts read them directly. Minimum to capture (full list in PAPER-OUTLINE Part B):
+
+- **Per-epoch val macro-F1** per recipe (A/B/ablation) → learning curves + the "which epoch won / where
+  returns diminish" claim. *(Bitext already showed **Recipe A best @ 2 epochs** — save the curve behind it.)*
+- **A changelog of adjustments** (LR, LoRA r/alpha, max_seq_len, loss-masking) and *why*.
+- **≥2–3 seeds/recipe** → mean ± σ (feeds the error bars).
+- **Train-vs-val gap per epoch** → the overfitting analysis.
+- **Final test scores, scored ONCE**, all recipes × both datasets → `artifacts/<dataset>/eval/test_<recipe>.json`.
+
+Run CLINC as its own track mirroring Bitext: `prepare --dataset clinc` → train A/B/ablation on the 151
+labels → score on the CLINC test sample. Then push results back per §10 for the Mac to build M3 + the paper.

@@ -12,11 +12,19 @@ teacher:
     base_url_env: TEACHER_BASE_URL
 
 panel:
-  anthropic-flagship:
-    provider: claude-code-cli        # runs via `claude -p` on the Claude Code subscription
-    model: "claude-opus-4-8"         # confirm the flagship id to pin at eval time
-  # Additional panel entries (OpenAI GPT-5.6 / Gemini flagship / open peers such as
-  # Kimi K2.x / DeepSeek / Qwen) are TBD — pending the panel-access decision at M3.
+  # Finalized M3 panel (2026-07-28), two tiers a real team actually chooses between.
+  # Fable 5 + Haiku run free via the Claude Code sub; the rest are metered on OpenRouter
+  # (same TEACHER_API_KEY). Eval is label-only (Recipe A emits label-only at inference).
+  # Cost axis reports LIST API prices so free-via-sub models are compared fairly.
+  # --- flagship tier (recognition: "if you threw the best at it") ---
+  kimi-k3-teacher:       {tier: flagship,  provider: openrouter,     model: "moonshotai/kimi-k3"}           # teacher + panel entry
+  openai-gpt-5.6-sol:    {tier: flagship,  provider: openrouter,     model: "openai/gpt-5.6-sol"}           # $5/$30
+  google-gemini-3-flash: {tier: flagship,  provider: openrouter,     model: "google/gemini-3-flash-preview"}
+  anthropic-fable-5:     {tier: flagship,  provider: claude-code-cli, model: "claude-fable-5"}              # free via sub
+  # --- efficient tier (the cheap cloud option a team would really deploy) ---
+  anthropic-haiku-4.5:   {tier: efficient, provider: claude-code-cli, model: "claude-haiku-4-5"}            # free via sub
+  openai-gpt-5.6-luna:   {tier: efficient, provider: openrouter,     model: "openai/gpt-5.6-luna"}          # cheap tier of the same GPT-5.6 line
+  deepseek-v3.2:         {tier: efficient, provider: openrouter,     model: "deepseek/deepseek-v3.2"}
 
 student:
   qwen3-4b:
