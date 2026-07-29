@@ -34,6 +34,23 @@ force-reinstalled from the cu130 index afterwards. `[tool.uv.sources]` in
 
 ## Windows quirks encountered
 
+- **Never launch anything via Task Scheduler (`schtasks`) + uv/venv-shim in this repo.**
+  The task session cannot resolve the uv-managed base interpreter
+  (`AppData\Roaming\uv\python\...`): the venv shim dies with "No Python at ...", and
+  `uv run` — even with `--no-sync` — declares the venv "linked to non-existent Python
+  interpreter", downloads a fresh CPython, and starts RECREATING the venv. A killed
+  attempt (2026-07-29) left the venv partially gutted (annotated-types, certifi,
+  charset-normalizer, einops, aiohttp, accelerate, bitsandbytes stripped; torch/unsloth
+  survived). Repair = targeted `uv pip install` of the missing leaves (probe first with
+  an import loop), NEVER `uv sync`. For a process that must survive the launcher's exit,
+  spawn via WMI instead: `Invoke-CimMethod Win32_Process Create` with
+  `cmd /c cd /d <repo> && set PYTHONUTF8=1&& .venv\Scripts\python.exe -m ...` — it runs
+  outside the caller's job object with a normal user environment.
+- **A CUDA process launched <1s after another CUDA process exits can die with
+  0xC0000005** (access violation) during unsloth import — WDDM teardown race. Both the
+  matrix driver and epoch_sweep now cool down 8s before each launch and retry a crash
+  once. Timeouts (livelocks) are not retried.
+
 - **uv installer race**: first `uv sync` after installing uv failed with "Missing
   expected target directory for Python minor version link" — just re-run, the
   second attempt succeeds.
