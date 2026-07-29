@@ -19,6 +19,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from triage_distill.datasets import cfg
@@ -83,7 +84,16 @@ def main() -> None:
         if args.limit:
             cmd += ["--limit", str(args.limit)]
         print(f"\n-- epoch {epoch} ({ckpt.name}) --")  # ASCII: subprocess stdout is cp1252 on Windows
-        subprocess.run(cmd, cwd=REPO_ROOT, check=True)
+        # A CUDA process launched right after the previous one exits can die with
+        # 0xC0000005 during import (WDDM teardown race, docs/ENV-4090-WINDOWS.md) —
+        # cool down before each launch and retry a crash once.
+        time.sleep(8)
+        try:
+            subprocess.run(cmd, cwd=REPO_ROOT, check=True)
+        except subprocess.CalledProcessError:
+            print("infer crashed — retrying once after cooldown")
+            time.sleep(30)
+            subprocess.run(cmd, cwd=REPO_ROOT, check=True)
 
         preds = {r["id"]: r.get("pred") for r in _read_jsonl(preds_path)}
         gold_used = {i: g for i, g in gold.items() if i in preds} if args.limit else gold
