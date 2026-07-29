@@ -155,7 +155,7 @@ def main() -> None:
         tokenizer = AutoTokenizer.from_pretrained(args.base)
         texts = _render(tokenizer, rows)
         print("token lengths (chat-templated):", json.dumps(_length_stats(tokenizer, texts)))
-        print("\n─ example 0, exactly as the model sees it ─\n")
+        print("\n-- example 0, exactly as the model sees it --\n")  # ASCII: Windows console is cp1252
         print(texts[0])
         return
 

@@ -49,7 +49,9 @@ SYS_REASON = (
 def _load_jsonl(path: Path) -> list[dict]:
     if not path.exists():
         raise FileNotFoundError(f"{path} missing. Run `python -m triage_distill.label.targets` first.")
-    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    # encoding is explicit: Windows' locale default is cp1252, which silently mangles
+    # CLINC's curly quotes (the committed targets are UTF-8)
+    return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
 
 
 def _msg(system: str, user: str, target: dict) -> dict:
@@ -62,7 +64,7 @@ def _msg(system: str, user: str, target: dict) -> dict:
 
 
 def _write(path: Path, rows: list[dict]) -> None:
-    with path.open("w") as fh:
+    with path.open("w", encoding="utf-8") as fh:
         for r in rows:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 

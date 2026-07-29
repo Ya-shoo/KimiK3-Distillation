@@ -21,7 +21,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from triage_distill.datasets import cfg
 from triage_distill.eval.score import _read_jsonl, score
+from triage_distill.schema import load_label_space
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
@@ -40,11 +42,16 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", required=True, help="runs/<name>")
     ap.add_argument("--mode", choices=("classify", "reason"), required=True)
-    ap.add_argument("--gold", default="data/train/val_eval.jsonl")
+    ap.add_argument("--dataset", default="bitext", help="picks the frozen label space + default gold")
+    ap.add_argument("--gold", default=None, help="default: the dataset's val_eval.jsonl")
     ap.add_argument("--batch-size", type=int, default=32)
     ap.add_argument("--limit", type=int, default=None, help="smoke tests only")
     args = ap.parse_args()
 
+    dcfg = cfg(args.dataset)
+    labels = list(load_label_space(dcfg.label_space))
+    if args.gold is None:
+        args.gold = str((dcfg.train_dir / "val_eval.jsonl").relative_to(REPO_ROOT))
     run_dir = (REPO_ROOT / args.run) if not Path(args.run).is_absolute() else Path(args.run)
     gold_path = REPO_ROOT / args.gold
     gold = {r["id"]: r["gold"] for r in _read_jsonl(gold_path)}
@@ -62,7 +69,7 @@ def main() -> None:
 
         preds_path = run_dir / f"preds_epoch{epoch}.jsonl"
         cmd = [sys.executable, "-m", "triage_distill.eval.infer",
-               "--adapter", str(ckpt), "--mode", args.mode,
+               "--adapter", str(ckpt), "--mode", args.mode, "--dataset", args.dataset,
                "--data", args.gold, "--out", str(preds_path),
                "--batch-size", str(args.batch_size)]
         if args.limit:
@@ -72,12 +79,16 @@ def main() -> None:
 
         preds = {r["id"]: r.get("pred") for r in _read_jsonl(preds_path)}
         gold_used = {i: g for i, g in gold.items() if i in preds} if args.limit else gold
-        rep = score(preds, gold_used)
-        results.append({"epoch": epoch, "checkpoint": ckpt.name,
-                        "macro_f1": rep["macro_f1"], "accuracy": rep["accuracy"],
-                        "invalid": rep["invalid"], "worst_classes": rep["worst_classes"]})
+        rep = score(preds, gold_used, labels=labels)
+        row = {"epoch": epoch, "checkpoint": ckpt.name,
+               "macro_f1": rep["macro_f1"], "accuracy": rep["accuracy"],
+               "invalid": rep["invalid"], "worst_classes": rep["worst_classes"]}
+        if "oos" in rep:  # CLINC: the escalate signal, tracked per epoch
+            row["oos"] = rep["oos"]
+        results.append(row)
         print(f"epoch {epoch}: macro-F1={rep['macro_f1']:.4f}  acc={rep['accuracy']:.4f}  "
-              f"invalid={rep['invalid']}")
+              f"invalid={rep['invalid']}"
+              + (f"  oos-recall={rep['oos']['recall']}" if "oos" in rep else ""))
 
     best = max(results, key=lambda r: r["macro_f1"])
     out = {"run": run_dir.name, "mode": args.mode, "gold": args.gold,

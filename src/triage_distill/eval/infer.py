@@ -27,6 +27,7 @@ import json
 import time
 from pathlib import Path
 
+from triage_distill.datasets import cfg
 from triage_distill.schema import load_label_space
 from triage_distill.train.prepare import SYS_CLASSIFY, SYS_REASON
 
@@ -40,9 +41,9 @@ MODES = {
 }
 
 
-def _schema(mode: str) -> dict:
-    """Per-mode output schema; the category enum comes from the frozen label space."""
-    enum = {"type": "string", "enum": list(load_label_space())}
+def _schema(mode: str, labels: list[str]) -> dict:
+    """Per-mode output schema; the category enum comes from the dataset's frozen label space."""
+    enum = {"type": "string", "enum": labels}
     if mode == "classify":
         return {"type": "object", "properties": {"category": enum},
                 "required": ["category"], "additionalProperties": False}
@@ -64,12 +65,17 @@ def main() -> None:
     ap.add_argument("--base", default=DEFAULT_BASE)
     ap.add_argument("--mode", choices=MODES, required=True,
                     help="classify = SYS_CLASSIFY (ablation + recipe A); reason = SYS_REASON (recipe B)")
-    ap.add_argument("--data", default="data/train/val_eval.jsonl")
+    ap.add_argument("--dataset", default="bitext", help="picks the frozen label space + default eval data")
+    ap.add_argument("--data", default=None, help="eval JSONL (default: the dataset's val_eval.jsonl)")
     ap.add_argument("--out", required=True, help="preds.jsonl path ({id, pred, raw})")
     ap.add_argument("--batch-size", type=int, default=32)
     ap.add_argument("--limit", type=int, default=None, help="first N rows only (smoke tests)")
     args = ap.parse_args()
 
+    dcfg = cfg(args.dataset)
+    labels = list(load_label_space(dcfg.label_space))
+    if args.data is None:
+        args.data = str(dcfg.train_dir / "val_eval.jsonl")
     data_path = (REPO_ROOT / args.data) if not Path(args.data).is_absolute() else Path(args.data)
     rows = [json.loads(l) for l in data_path.read_text(encoding="utf-8").splitlines() if l.strip()]
     if args.limit:
@@ -102,8 +108,8 @@ def main() -> None:
     from transformers.utils import logging as hf_logging
     hf_logging.set_verbosity_error()  # silence per-batch generation-config warnings
 
-    prefix_fn = build_transformers_prefix_allowed_tokens_fn(tokenizer, JsonSchemaParser(_schema(args.mode)))
-    label_set = set(load_label_space())
+    prefix_fn = build_transformers_prefix_allowed_tokens_fn(tokenizer, JsonSchemaParser(_schema(args.mode, labels)))
+    label_set = set(labels)
 
     def render(text: str) -> str:
         messages = [
@@ -181,7 +187,7 @@ def main() -> None:
     print(f"\nwrote {out_path.relative_to(REPO_ROOT)}  |  valid {n_ok}/{len(rows)}  |  "
           f"retries {len(retry)}  |  {secs / 60:.1f} min ({len(rows) / secs:.1f} tickets/s)")
     print(f"score it: uv run --no-sync python -m triage_distill.eval.score "
-          f"--preds {out_path.relative_to(REPO_ROOT)} --gold data/train/val_eval.jsonl")
+          f"--preds {out_path.relative_to(REPO_ROOT)} --dataset {args.dataset}")
 
 
 if __name__ == "__main__":
