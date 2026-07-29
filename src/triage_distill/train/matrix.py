@@ -105,10 +105,21 @@ def sh(cmd: list[str], timeout_min: float, retries: int = 1) -> str:
 
 
 def _stages_done(run_dir: Path, steps_per_epoch: int) -> int:
-    """Highest completed epoch, inferred from existing checkpoint step numbers."""
+    """Highest completed epoch, inferred from existing checkpoint step numbers.
+
+    A hard kill mid-save leaves a checkpoint whose trainer_state.json is all NULs
+    (allocated, never flushed) — HF resume would crash on it, so quarantine it.
+    """
+    import shutil
     best = 0
     for p in (run_dir / "checkpoints").glob("checkpoint-*"):
         if m := re.match(r"checkpoint-(\d+)$", p.name):
+            try:
+                json.loads((p / "trainer_state.json").read_text(encoding="utf-8"))
+            except Exception:
+                log(f"  corrupt checkpoint {p.name} (truncated save) — deleting")
+                shutil.rmtree(p, ignore_errors=True)
+                continue
             best = max(best, int(m.group(1)) // steps_per_epoch)
     return best
 
