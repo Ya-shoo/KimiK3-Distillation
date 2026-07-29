@@ -1,0 +1,29 @@
+{
+  "adjustment_changelog": [
+    {
+      "date": "2026-07-28",
+      "who": "owner",
+      "what": "Initial knobs, one config for all three recipes (the recipe is the only experimental variable): LoRA r=16 alpha=32, attn+MLP target modules, lr 2e-4 linear, 3 epochs with per-epoch checkpoints, batch 32x1, max_seq_len 256, completion-only loss.",
+      "why": "r=16/alpha=32 = the light end of the coached range (small data, 27 classes); attn+MLP over attn-only for capacity headroom; lr at the top of the 1e-4..2e-4 range since LoRA tolerates it; epochs=3 with per-epoch VAL sweep so the epoch count is a measurement, not a guess; seq 256 sized to recipe B's ~p95 chat-templated length from the dry-run stats."
+    },
+    {
+      "date": "2026-07-28",
+      "who": "agent (engineering, not hyperparameters)",
+      "what": "Two Windows-stack workarounds, no training-math changes: (1) --stage runs one epoch per process with HF checkpoint resume, plus a gc+empty_cache flush every 50 steps, to dodge a VRAM-creep livelock that reproduces past ~350 optimizer steps per process; (2) recipe B inference decodes free-form first and constrained-re-decodes only schema failures, because LMFE per-token enforcement is ~100x slower inside free-text rationale fields.",
+      "why": "Documented in docs/ENV-4090-WINDOWS.md; optimizer/scheduler/RNG are restored on resume so a staged run is the same training run."
+    },
+    {
+      "date": "2026-07-28",
+      "who": "owner",
+      "what": "No mid-run hyperparameter adjustments were made; the initial config ran to completion for all three recipes.",
+      "why": "First pass intentionally identical across recipes; tuning would fork the controlled comparison."
+    }
+  ],
+  "caveats": [
+    "Recipe A's training file interleaves a classify row and an explain row per ticket (5,722 rows vs 2,861), so at equal 'epochs' A got ~2x the optimizer steps of B/ablation (179 vs 90 steps/epoch). A's win may partly be optimizer budget, not multi-task signal alone — owner to interpret; an ablation-at-6-epochs or step-matched control would separate the two.",
+    "delivery_period <-> track_order is the known Bitext label-noise pair (see M1 gold-gate audit): it is the floor on ablation and recipe B per-class F1 at every epoch, while recipe A largely resolved it by epoch 2.",
+    "Constrained JSON decoding produced zero invalid outputs across all runs and epochs, so invalid-rate differences play no role in the comparison.",
+    "Single seed (42) so far - seed-variance error bars (PAPER-OUTLINE Part B) still owed; val macro-F1 deltas between recipes (A +0.86pt over ablation, B -0.44pt under it at best epochs) are not yet distinguishable from seed noise.",
+    "Train-vs-val gap is reported as per-epoch train LOSS alongside val macro-F1 (train macro-F1 was not scored). The signal: A/B train loss kept falling epoch 2->3 while val macro-F1 dipped slightly, and the ablation's train loss was already ~0 by mid-epoch 2 (label-only targets are a few tokens - it memorizes the train set) -> mild overfitting past epoch 2, consistent with best_epoch=2 everywhere."
+  ]
+}

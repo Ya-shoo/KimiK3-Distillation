@@ -36,6 +36,16 @@ dev = [
     "pytest>=8",
 ]
 
+# CUDA torch on the 4090 box only — macOS keeps resolving torch from PyPI.
+# (PyPI's Windows torch wheel is CPU-only; driver 596.49 => CUDA 13 index.)
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
