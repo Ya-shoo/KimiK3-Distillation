@@ -21,11 +21,16 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import subprocess
 import sys
 import time
 from pathlib import Path
+
+# Windows: child processes inherit a cp1252 default that chokes on non-ASCII prints
+# and file IO; force UTF-8 mode for everything the driver launches.
+ENV = {**os.environ, "PYTHONUTF8": "1"}
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RUNS = REPO_ROOT / "runs"
@@ -89,7 +94,7 @@ def sh(cmd: list[str], timeout_min: float, retries: int = 1) -> str:
         time.sleep(LAUNCH_COOLDOWN_S if attempt == 0 else RETRY_COOLDOWN_S)
         log(("  $ " if attempt == 0 else f"  $ [retry {attempt}] ") + " ".join(cmd))
         try:
-            r = subprocess.run(cmd, cwd=REPO_ROOT, timeout=timeout_min * 60)
+            r = subprocess.run(cmd, cwd=REPO_ROOT, timeout=timeout_min * 60, env=ENV)
             if r.returncode == 0:
                 return "ok"
             res = f"exit {r.returncode}"

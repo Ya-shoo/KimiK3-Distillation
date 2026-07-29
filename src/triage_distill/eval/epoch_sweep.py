@@ -82,7 +82,7 @@ def main() -> None:
                "--batch-size", str(args.batch_size)]
         if args.limit:
             cmd += ["--limit", str(args.limit)]
-        print(f"\n── epoch {epoch} ({ckpt.name}) ──")
+        print(f"\n-- epoch {epoch} ({ckpt.name}) --")  # ASCII: subprocess stdout is cp1252 on Windows
         subprocess.run(cmd, cwd=REPO_ROOT, check=True)
 
         preds = {r["id"]: r.get("pred") for r in _read_jsonl(preds_path)}
