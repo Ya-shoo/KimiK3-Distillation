@@ -1,5 +1,27 @@
 # Handoff — M2 student training on the RTX 4090
 
+## ⚡ START HERE — status & what changed since Bitext (read first)
+If you just finished the **Bitext** training, the plan has expanded. Current state:
+
+1. **Bitext M2 is done** — Recipe A won @ ~2 epochs. **Reuse that config as the CLINC starting point.**
+   If you haven't yet, first **push your Bitext results** (§10) and **log the §11 findings** (the paper needs them).
+2. **There are now TWO benchmarks.** Your next task is the **CLINC-150 track** — mirror your Bitext run on the
+   new committed data (`data/clinc/`): `prepare --dataset clinc` → train **A / B / ablation** on the **151 labels**
+   (150 intents + `oos`) → score on the CLINC test sample. Everything downstream takes `--dataset clinc`.
+3. **Eval is label-only.** Recipe A (the winner) emits label-only at inference, so score everything label-only
+   (constrained JSON, `category` only). `oos` doubles as the escalate signal — report its recall.
+4. **The panel + paper are the M3/M6 targets.** The finalized 7-model two-tier panel is in `configs/models.yaml`;
+   the end deliverable is a mini-paper + resume artifact spec'd in `docs/PAPER-OUTLINE.md`. **Emit §11 findings as
+   JSON** (per-epoch curves, best epoch, adjustment changelog, seed variance) — the paper + charts read them.
+5. **Round-trip:** push code + `artifacts/<dataset>/eval/*.json` back (§10); the Mac builds M3 + the paper.
+   Weights stay off git (→ Hugging Face).
+
+The rest of this doc (§0–11) is the original Bitext-M2 guide — still valid for **mechanics**; just apply it with
+`--dataset clinc`. And keep the **collaboration model** below: the owner drives the training-loop/LoRA decisions;
+you scaffold, coach, and log.
+
+---
+
 **Focus for this machine:** train the small **student** (Qwen3-4B, QLoRA) on the K3-distilled
 data produced in M1, evaluate on the val split, and run the **A vs B vs ablation** controlled
 experiment. All the teacher/labeling work is done and committed — this box does the GPU training.
