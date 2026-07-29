@@ -138,12 +138,17 @@ def main() -> None:
     ap.add_argument("--base", default=DEFAULT_BASE)
     ap.add_argument("--dry-run", action="store_true",
                     help="render + token-length stats + one full example, then exit (no knobs needed)")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="override KNOBS.seed for multi-seed variance runs (KNOBS stays the owner's file)")
+    ap.add_argument("--epochs", type=float, default=None,
+                    help="override KNOBS.epochs (e.g. the step-matched 6-epoch ablation control)")
     ap.add_argument("--stage", type=int, default=None,
                     help="train up to epoch N this process, resuming from the last checkpoint. "
                          "Workaround for a per-step VRAM creep in the Windows stack that "
                          "livelocks runs longer than ~350 steps — one process per epoch stays "
-                         "under the wall; HF resume restores optimizer/scheduler/RNG, so the "
-                         "staged run is the same training run.")
+                         "under the wall. The LR schedule is built for the FULL run and a "
+                         "callback halts at the stage boundary, so staged == unstaged training "
+                         "(the Bitext recipe_a run predates this and sawtoothed — see findings).")
     args = ap.parse_args()
 
     data_path = (REPO_ROOT / args.data) if not Path(args.data).is_absolute() else Path(args.data)
@@ -158,6 +163,11 @@ def main() -> None:
         print("\n-- example 0, exactly as the model sees it --\n")  # ASCII: Windows console is cp1252
         print(texts[0])
         return
+
+    if args.seed is not None:
+        KNOBS.seed = args.seed
+    if args.epochs is not None:
+        KNOBS.epochs = args.epochs
 
     missing = [k for k in REQUIRED if getattr(KNOBS, k) is None]
     if missing:
@@ -203,7 +213,10 @@ def main() -> None:
         max_length=KNOBS.max_seq_len,
         per_device_train_batch_size=KNOBS.per_device_batch,
         gradient_accumulation_steps=KNOBS.grad_accum,
-        num_train_epochs=stage,
+        # ALWAYS the full run's epochs: the scheduler derives its decay total from this,
+        # and passing the stage here made stage-1 anneal to zero LR in one epoch (the
+        # Bitext recipe_a sawtooth). _StopAfterStage halts at the stage boundary instead.
+        num_train_epochs=KNOBS.epochs,
         learning_rate=KNOBS.learning_rate,
         lr_scheduler_type=KNOBS.lr_scheduler,
         warmup_ratio=KNOBS.warmup_ratio,
@@ -241,7 +254,15 @@ def main() -> None:
                 gc.collect()
                 torch.cuda.empty_cache()
 
+    class _StopAfterStage(TrainerCallback):
+        """End this process at the stage boundary; the epoch checkpoint is already saved."""
+        def on_epoch_end(self, targs, state, control, **kw):
+            if state.epoch is not None and state.epoch >= stage - 1e-6:
+                control.should_training_stop = True
+
     trainer.add_callback(_FlushCache())
+    if not final_stage:
+        trainer.add_callback(_StopAfterStage())
 
     resume = args.stage is not None and args.stage > 1
     t0 = time.time()

@@ -46,6 +46,9 @@ def main() -> None:
     ap.add_argument("--gold", default=None, help="default: the dataset's val_eval.jsonl")
     ap.add_argument("--batch-size", type=int, default=32)
     ap.add_argument("--limit", type=int, default=None, help="smoke tests only")
+    ap.add_argument("--only-epoch", type=int, default=None,
+                    help="score just this epoch's checkpoint (extra-seed runs: the best epoch "
+                         "is chosen on the primary seed's full sweep, then held fixed)")
     args = ap.parse_args()
 
     dcfg = cfg(args.dataset)
@@ -57,9 +60,14 @@ def main() -> None:
     gold = {r["id"]: r["gold"] for r in _read_jsonl(gold_path)}
     ckpts = _checkpoints(run_dir)
     print(f"{run_dir.name}: {len(ckpts)} epoch checkpoints -> {[p.name for p in ckpts]}")
+    todo = list(enumerate(ckpts, start=1))
+    if args.only_epoch:
+        todo = [(e, c) for e, c in todo if e == args.only_epoch]
+        if not todo:
+            raise SystemExit(f"--only-epoch {args.only_epoch} not in 1..{len(ckpts)}")
 
     results = []
-    for epoch, ckpt in enumerate(ckpts, start=1):
+    for epoch, ckpt in todo:
         # HF Trainer usually saves the tokenizer with each checkpoint; backfill from
         # the final adapter dir if this one is missing it.
         for f in TOKENIZER_FILES:
@@ -92,7 +100,8 @@ def main() -> None:
 
     best = max(results, key=lambda r: r["macro_f1"])
     out = {"run": run_dir.name, "mode": args.mode, "gold": args.gold,
-           "limit": args.limit, "best_epoch": best["epoch"], "epochs": results}
+           "limit": args.limit, "only_epoch": args.only_epoch,
+           "best_epoch": best["epoch"], "epochs": results}
     (run_dir / "epoch_scores.json").write_text(json.dumps(out, indent=2))
 
     print(f"\n{'epoch':>5}  {'macro-F1':>9}  {'acc':>7}  {'invalid':>7}")
