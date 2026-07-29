@@ -34,6 +34,8 @@ BATCH = 32  # must match KNOBS.per_device_batch; used only to infer completed st
 
 TRAIN_TIMEOUT_MIN = 45          # a stage is ~5-10 min; way past this = livelocked
 SWEEP_TIMEOUT_MIN = {"classify": 120, "reason": 180}
+LAUNCH_COOLDOWN_S = 8           # observed 0xC0000005 during unsloth import when a CUDA process
+RETRY_COOLDOWN_S = 30           # launched <1s after the previous one exited (WDDM teardown race)
 
 RECIPES = (("recipe_a", "classify"), ("ablation", "classify"), ("recipe_b", "reason"))
 SEEDS_EXTRA = (1337, 2024)
@@ -79,13 +81,22 @@ def log(msg: str) -> None:
         fh.write(line + "\n")
 
 
-def sh(cmd: list[str], timeout_min: float) -> str:
-    log("  $ " + " ".join(cmd))
-    try:
-        r = subprocess.run(cmd, cwd=REPO_ROOT, timeout=timeout_min * 60)
-        return "ok" if r.returncode == 0 else f"exit {r.returncode}"
-    except subprocess.TimeoutExpired:
-        return "TIMEOUT (livelock?)"
+def sh(cmd: list[str], timeout_min: float, retries: int = 1) -> str:
+    """Run with a pre-launch cooldown; retry crashes once. Timeouts (livelocks) don't retry —
+    a second 45-min hang would cost more than the run is worth tonight."""
+    res = "not run"
+    for attempt in range(retries + 1):
+        time.sleep(LAUNCH_COOLDOWN_S if attempt == 0 else RETRY_COOLDOWN_S)
+        log(("  $ " if attempt == 0 else f"  $ [retry {attempt}] ") + " ".join(cmd))
+        try:
+            r = subprocess.run(cmd, cwd=REPO_ROOT, timeout=timeout_min * 60)
+            if r.returncode == 0:
+                return "ok"
+            res = f"exit {r.returncode}"
+        except subprocess.TimeoutExpired:
+            return "TIMEOUT (livelock?)"
+        log(f"  attempt {attempt + 1}: {res}")
+    return res
 
 
 def _stages_done(run_dir: Path, steps_per_epoch: int) -> int:
