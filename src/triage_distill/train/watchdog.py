@@ -59,12 +59,16 @@ def _procs_with(needle: str) -> int:
 
 
 def _launch_matrix() -> None:
-    cmd = (f'cd /d "{REPO_ROOT}" && set PYTHONUTF8=1&& '
-           f'"{REPO_ROOT}\\.venv\\Scripts\\python.exe" -m triage_distill.train.matrix '
-           f'>> "{RUNS}\\matrix_console.log" 2>&1')
+    # Real file handles for stdout/stderr: under a detached/console-less parent the
+    # cmd-with-redirection form inherits invalid std handles and dies before launching.
+    import os
+    out = (RUNS / "matrix_console.log").open("a", encoding="utf-8", errors="replace")
     # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP: the driver outlives this watchdog.
-    subprocess.Popen(["cmd", "/c", cmd], creationflags=0x00000008 | 0x00000200,
-                     close_fds=True)
+    subprocess.Popen(
+        [str(REPO_ROOT / ".venv" / "Scripts" / "python.exe"), "-m", "triage_distill.train.matrix"],
+        cwd=REPO_ROOT, env={**os.environ, "PYTHONUTF8": "1"},
+        stdout=out, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+        creationflags=0x00000008 | 0x00000200)
 
 
 def _telemetry() -> None:
