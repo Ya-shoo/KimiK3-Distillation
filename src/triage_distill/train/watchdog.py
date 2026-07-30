@@ -90,8 +90,15 @@ def _deregister() -> None:
 
 
 def main() -> None:
-    if _procs_with("triage_distill.train.watchdog") > 0:
-        return  # another watchdog already holds the fort
+    wlog("watchdog starting (pre-guard)")  # first breath BEFORE anything that can throw
+    try:
+        others = _procs_with("triage_distill.train.watchdog")
+    except Exception as e:  # logon-storm psutil hiccup: assume alone rather than die silently
+        wlog(f"guard check failed ({e!r}) — assuming no other watchdog")
+        others = 0
+    if others > 0:
+        wlog("another watchdog is running — exiting")
+        return
     ctypes.windll.kernel32.SetThreadExecutionState(ES_KEEP_AWAKE)
     state = json.loads(STATE.read_text()) if STATE.exists() else {"relaunches": 0}
     wlog(f"watchdog up (relaunches so far: {state['relaunches']})")
@@ -123,4 +130,10 @@ def main() -> None:
 
 
 if __name__ == "__main__" and sys.platform == "win32":
-    main()
+    try:
+        main()
+    except Exception as e:  # pythonw is silent — leave a trace no matter what
+        try:
+            wlog(f"FATAL: {e!r}")
+        finally:
+            raise
