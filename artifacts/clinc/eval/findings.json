@@ -1,6 +1,6 @@
 {
   "dataset": "clinc",
-  "git_commit": "e35b83f",
+  "git_commit": "1905356",
   "runs": {
     "clinc_ablation_s42": {
       "mode": "classify",
@@ -181,6 +181,97 @@
         [
           0.809,
           "oos"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s42": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 4.1,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.9054,
+          "val_accuracy": 0.8974,
+          "invalid": 18
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9255,
+          "val_accuracy": 0.9184,
+          "invalid": 11
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9316,
+          "val_accuracy": 0.9255,
+          "invalid": 8
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9316,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.6675,
+          "train_loss_last": 0.392
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.29,
+          "train_loss_last": 0.2932
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.2042,
+          "train_loss_last": 0.1907
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4815,
+          "reminder"
+        ],
+        [
+          0.4853,
+          "oos"
+        ],
+        [
+          0.5806,
+          "accept_reservations"
+        ],
+        [
+          0.6667,
+          "restaurant_reservation"
         ]
       ]
     },

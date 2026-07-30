@@ -1,0 +1,115 @@
+{
+  "run": "clinc_recipe_b_s42",
+  "mode": "reason",
+  "gold": "data\\clinc\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": null,
+  "best_epoch": 3,
+  "epochs": [
+    {
+      "epoch": 1,
+      "checkpoint": "checkpoint-179",
+      "macro_f1": 0.9053791910311142,
+      "accuracy": 0.8974193548387097,
+      "invalid": 18,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4487,
+          "oos"
+        ],
+        [
+          0.5385,
+          "reminder"
+        ],
+        [
+          0.6,
+          "directions"
+        ],
+        [
+          0.6061,
+          "maybe"
+        ]
+      ],
+      "oos": {
+        "recall": 0.35,
+        "precision": 0.625,
+        "n_gold": 100,
+        "n_pred": 56
+      }
+    },
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-358",
+      "macro_f1": 0.9254671621348017,
+      "accuracy": 0.9183870967741935,
+      "invalid": 11,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4148,
+          "oos"
+        ],
+        [
+          0.4231,
+          "reminder"
+        ],
+        [
+          0.5185,
+          "accept_reservations"
+        ],
+        [
+          0.6531,
+          "restaurant_reservation"
+        ]
+      ],
+      "oos": {
+        "recall": 0.28,
+        "precision": 0.8,
+        "n_gold": 100,
+        "n_pred": 35
+      }
+    },
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-537",
+      "macro_f1": 0.9315824919538906,
+      "accuracy": 0.925483870967742,
+      "invalid": 8,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4815,
+          "reminder"
+        ],
+        [
+          0.4853,
+          "oos"
+        ],
+        [
+          0.5806,
+          "accept_reservations"
+        ],
+        [
+          0.6667,
+          "restaurant_reservation"
+        ]
+      ],
+      "oos": {
+        "recall": 0.33,
+        "precision": 0.9167,
+        "n_gold": 100,
+        "n_pred": 36
+      }
+    }
+  ]
+}
