@@ -142,6 +142,10 @@ def main() -> None:
                     help="override KNOBS.seed for multi-seed variance runs (KNOBS stays the owner's file)")
     ap.add_argument("--epochs", type=float, default=None,
                     help="override KNOBS.epochs (e.g. the step-matched 6-epoch ablation control)")
+    ap.add_argument("--per-device-batch", type=int, default=None,
+                    help="memory-layout override; pair with --grad-accum to keep the effective batch")
+    ap.add_argument("--grad-accum", type=int, default=None,
+                    help="e.g. 16x2 instead of 32x1: same effective batch/steps/schedule, ~half the activation VRAM")
     ap.add_argument("--stage", type=int, default=None,
                     help="train up to epoch N this process, resuming from the last checkpoint. "
                          "Workaround for a per-step VRAM creep in the Windows stack that "
@@ -168,6 +172,10 @@ def main() -> None:
         KNOBS.seed = args.seed
     if args.epochs is not None:
         KNOBS.epochs = args.epochs
+    if args.per_device_batch is not None:
+        KNOBS.per_device_batch = args.per_device_batch
+    if args.grad_accum is not None:
+        KNOBS.grad_accum = args.grad_accum
 
     missing = [k for k in REQUIRED if getattr(KNOBS, k) is None]
     if missing:

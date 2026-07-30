@@ -135,11 +135,20 @@ def run_one(spec: dict) -> str:
         n_rows = sum(1 for l in (REPO_ROOT / spec["data"]).open(encoding="utf-8") if l.strip())
         spe = math.ceil(n_rows / BATCH)
         start = _stages_done(run_dir, spe) + 1
+        lowmem = False  # post-reboot the VRAM floor rose ~6GB and bs32 can livelock into
+        # the WDDM ceiling; 16x2 keeps effective batch/steps/schedule identical on ~half
+        # the activation memory. Optimizer-step numbering is unchanged, so spe still holds.
         for stage in range(start, int(spec["epochs"]) + 1):
-            res = sh([sys.executable, "-m", "triage_distill.train.train",
-                      "--data", spec["data"], "--name", name, "--stage", str(stage),
-                      "--seed", str(spec["seed"]), "--epochs", str(spec["epochs"])],
-                     TRAIN_TIMEOUT_MIN)
+            cmd = [sys.executable, "-m", "triage_distill.train.train",
+                   "--data", spec["data"], "--name", name, "--stage", str(stage),
+                   "--seed", str(spec["seed"]), "--epochs", str(spec["epochs"])]
+            low = ["--per-device-batch", "16", "--grad-accum", "2"]
+            res = sh(cmd + (low if lowmem else []), TRAIN_TIMEOUT_MIN)
+            if res.startswith("TIMEOUT") and not lowmem:
+                lowmem = True
+                log(f"{name}: stage {stage} livelocked at bs32x1 — retrying as bs16xga2 "
+                    "(same effective batch, half the activation VRAM)")
+                res = sh(cmd + low, TRAIN_TIMEOUT_MIN)
             if res != "ok":
                 log(f"{name}: stage {stage} FAILED ({res}) — run abandoned")
                 return f"train stage {stage}: {res}"
