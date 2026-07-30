@@ -135,9 +135,11 @@ def run_one(spec: dict) -> str:
         n_rows = sum(1 for l in (REPO_ROOT / spec["data"]).open(encoding="utf-8") if l.strip())
         spe = math.ceil(n_rows / BATCH)
         start = _stages_done(run_dir, spe) + 1
-        lowmem = False  # post-reboot the VRAM floor rose ~6GB and bs32 can livelock into
-        # the WDDM ceiling; 16x2 keeps effective batch/steps/schedule identical on ~half
-        # the activation memory. Optimizer-step numbering is unchanged, so spe still holds.
+        # Post-reboot the VRAM floor rose ~6GB and bs32 livelocks into the WDDM ceiling
+        # intermittently (recipe_b stage 1 passed, stage 2 froze). Default ALL training to
+        # 16x2: same effective batch/steps/schedule, ~half the activation memory.
+        # Optimizer-step numbering is unchanged, so spe still holds.
+        lowmem = True
         for stage in range(start, int(spec["epochs"]) + 1):
             cmd = [sys.executable, "-m", "triage_distill.train.train",
                    "--data", spec["data"], "--name", name, "--stage", str(stage),
