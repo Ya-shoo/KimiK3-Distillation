@@ -1,0 +1,220 @@
+{
+  "run": "clinc_ablation_ctrl6_s42",
+  "mode": "classify",
+  "gold": "data\\clinc\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": null,
+  "best_epoch": 3,
+  "epochs": [
+    {
+      "epoch": 1,
+      "checkpoint": "checkpoint-179",
+      "macro_f1": 0.9470065064693889,
+      "accuracy": 0.9458064516129032,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.5862,
+          "reminder"
+        ],
+        [
+          0.6875,
+          "accept_reservations"
+        ],
+        [
+          0.7234,
+          "restaurant_reservation"
+        ],
+        [
+          0.7879,
+          "pto_used"
+        ]
+      ],
+      "oos": {
+        "recall": 0.7,
+        "precision": 0.9211,
+        "n_gold": 100,
+        "n_pred": 76
+      }
+    },
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-358",
+      "macro_f1": 0.9594414285780374,
+      "accuracy": 0.957741935483871,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6957,
+          "reminder"
+        ],
+        [
+          0.7817,
+          "oos"
+        ],
+        [
+          0.8095,
+          "restaurant_reservation"
+        ],
+        [
+          0.8235,
+          "accept_reservations"
+        ]
+      ],
+      "oos": {
+        "recall": 0.77,
+        "precision": 0.7938,
+        "n_gold": 100,
+        "n_pred": 97
+      }
+    },
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-537",
+      "macro_f1": 0.9624326030966283,
+      "accuracy": 0.9619354838709677,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6667,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "maybe"
+        ],
+        [
+          0.8182,
+          "no"
+        ],
+        [
+          0.8182,
+          "oos"
+        ]
+      ],
+      "oos": {
+        "recall": 0.72,
+        "precision": 0.9474,
+        "n_gold": 100,
+        "n_pred": 76
+      }
+    },
+    {
+      "epoch": 4,
+      "checkpoint": "checkpoint-716",
+      "macro_f1": 0.9595533621595007,
+      "accuracy": 0.9587096774193549,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "maybe"
+        ],
+        [
+          0.8023,
+          "oos"
+        ],
+        [
+          0.8182,
+          "no"
+        ]
+      ],
+      "oos": {
+        "recall": 0.71,
+        "precision": 0.9221,
+        "n_gold": 100,
+        "n_pred": 77
+      }
+    },
+    {
+      "epoch": 5,
+      "checkpoint": "checkpoint-895",
+      "macro_f1": 0.9614260739577325,
+      "accuracy": 0.9606451612903226,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "maybe"
+        ],
+        [
+          0.8068,
+          "oos"
+        ],
+        [
+          0.8182,
+          "no"
+        ]
+      ],
+      "oos": {
+        "recall": 0.71,
+        "precision": 0.9342,
+        "n_gold": 100,
+        "n_pred": 76
+      }
+    },
+    {
+      "epoch": 6,
+      "checkpoint": "checkpoint-1074",
+      "macro_f1": 0.9616742724755271,
+      "accuracy": 0.9606451612903226,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "maybe"
+        ],
+        [
+          0.7931,
+          "oos"
+        ],
+        [
+          0.8182,
+          "no"
+        ]
+      ],
+      "oos": {
+        "recall": 0.69,
+        "precision": 0.9324,
+        "n_gold": 100,
+        "n_pred": 74
+      }
+    }
+  ]
+}
