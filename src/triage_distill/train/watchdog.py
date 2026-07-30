@@ -71,17 +71,38 @@ def _launch_matrix() -> None:
         creationflags=0x00000008 | 0x00000200)
 
 
-def _telemetry() -> None:
+def _telemetry() -> tuple[float, float] | None:
+    """Append a telemetry line; return (power_W, mem_MiB) for the livelock detector."""
     try:
         r = subprocess.run(
             ["nvidia-smi", "--query-gpu=timestamp,temperature.gpu,power.draw,"
              "utilization.gpu,memory.used", "--format=csv,noheader"],
             capture_output=True, text=True, timeout=15)
         if r.returncode == 0 and r.stdout.strip():
+            line = r.stdout.strip()
             with TELEMETRY.open("a", encoding="utf-8") as fh:
-                fh.write(r.stdout.strip() + "\n")
+                fh.write(line + "\n")
+            parts = line.split(", ")
+            return float(parts[2].split()[0]), float(parts[4].split()[0])
     except Exception:
         pass
+    return None
+
+
+def _kill_wedged_gpu_procs() -> None:
+    """A WDDM livelock never recovers: kill the training/inference process so the
+    driver's retry ladder restarts it (at the low-memory layout) within minutes,
+    instead of waiting out the 45-min stage timeout."""
+    import psutil
+    for p in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            cl = " ".join(p.info["cmdline"] or [])
+            if (p.info["name"] or "").lower().startswith("python") and (
+                    "train.train" in cl or "eval.infer" in cl):
+                wlog(f"livelock: killing wedged {p.info['pid']} ({cl[-60:]})")
+                p.kill()
+        except Exception:
+            continue
 
 
 def _deregister() -> None:
@@ -102,6 +123,7 @@ def main() -> None:
     ctypes.windll.kernel32.SetThreadExecutionState(ES_KEEP_AWAKE)
     state = json.loads(STATE.read_text()) if STATE.exists() else {"relaunches": 0}
     wlog(f"watchdog up (relaunches so far: {state['relaunches']})")
+    wedge_ticks = 0
     try:
         while True:
             if DONE.exists():
@@ -123,7 +145,14 @@ def main() -> None:
                 # accumulate toward the cap, not recoveries from machine crashes
                 state = {"relaunches": 0}
                 STATE.write_text(json.dumps(state))
-            _telemetry()
+            t = _telemetry()
+            if t is not None:  # livelock signature: VRAM at ceiling, compute idle
+                power, mem = t
+                wedge_ticks = wedge_ticks + 1 if (mem > 23000 and power < 150) else 0
+                if wedge_ticks >= 3:
+                    wlog(f"livelock pattern ({mem:.0f} MiB / {power:.0f} W x{wedge_ticks} ticks)")
+                    _kill_wedged_gpu_procs()
+                    wedge_ticks = 0
             time.sleep(TICK_S)
     finally:
         ctypes.windll.kernel32.SetThreadExecutionState(ES_RELEASE)
