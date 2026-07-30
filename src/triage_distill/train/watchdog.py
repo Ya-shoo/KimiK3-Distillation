@@ -40,10 +40,17 @@ def wlog(msg: str) -> None:
 
 
 def _procs_with(needle: str) -> int:
+    """Other live python processes whose cmdline matches. Name-filtered so the
+    `cmd /c` wrappers don't count, and parent-excluded because the uv venv
+    python.exe is a shim that spawns the real interpreter with the same cmdline."""
+    import os
     import psutil
+    skip = {os.getpid(), os.getppid()}
     n = 0
-    for p in psutil.process_iter(["cmdline"]):
+    for p in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
+            if p.info["pid"] in skip or not (p.info["name"] or "").lower().startswith("python"):
+                continue
             if needle in " ".join(p.info["cmdline"] or []):
                 n += 1
         except Exception:
@@ -79,7 +86,7 @@ def _deregister() -> None:
 
 
 def main() -> None:
-    if _procs_with("triage_distill.train.watchdog") > 1:
+    if _procs_with("triage_distill.train.watchdog") > 0:
         return  # another watchdog already holds the fort
     ctypes.windll.kernel32.SetThreadExecutionState(ES_KEEP_AWAKE)
     state = json.loads(STATE.read_text()) if STATE.exists() else {"relaunches": 0}
