@@ -111,6 +111,11 @@ def main() -> None:
                 wlog(f"driver not running — relaunch #{state['relaunches']}")
                 _launch_matrix()
                 time.sleep(90)  # let it get past imports before re-checking
+            elif state["relaunches"]:
+                # driver survived past a full tick — only fast-fail loops should
+                # accumulate toward the cap, not recoveries from machine crashes
+                state = {"relaunches": 0}
+                STATE.write_text(json.dumps(state))
             _telemetry()
             time.sleep(TICK_S)
     finally:
