@@ -179,6 +179,9 @@ def main() -> None:
         return
 
     RUNS.mkdir(exist_ok=True)
+    if sys.platform == "win32":  # hold the box awake for the whole pass (auto-reverts on exit)
+        import ctypes
+        ctypes.windll.kernel32.SetThreadExecutionState(0x80000001)
     log(f"=== matrix start: {len(plan)} runs ===")
     outcomes = {}
     for spec in plan:
@@ -187,9 +190,12 @@ def main() -> None:
     log("=== matrix done ===")
     for n, o in outcomes.items():
         log(f"  {n:>28}: {o}")
+    (RUNS / "matrix_outcomes.json").write_text(json.dumps(outcomes, indent=2))
     failed = {n: o for n, o in outcomes.items() if o not in ("done",)}
     if failed:
         raise SystemExit(f"{len(failed)} run(s) incomplete: {failed}")
+    # all clean: tell the watchdog to stand down
+    (RUNS / "matrix.done").write_text(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":
