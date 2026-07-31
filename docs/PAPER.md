@@ -125,6 +125,11 @@ scored wrong) — all are token-budget exhaustion: the generated rationale overr
 the 512-token cap before the `category` field is emitted, so even constrained
 re-decoding cannot rescue the row (§7.4).
 
+**Zero-shot reference:** the same base model without fine-tuning, same constrained
+decoding, scores **0.3148** (Bitext) and **0.2693** (CLINC; oos recall 0.00) —
+distillation contributes ~+66 macro-F1 points on both benchmarks
+(`artifacts/*/eval/zeroshot_base.json`).
+
 ### 7.2 Retention vs teacher — ⟦pending M3: K3 baseline scored by identical code⟧
 
 ### 7.3 The ablation result: a benchmark-dependent mirror **[OWNER REVIEW]**

@@ -47,6 +47,10 @@ send it to a human."*
 The wobble columns matter: every gap discussed below is many times larger than
 the ±, so none of this is luck-of-the-seed.
 
+For scale: the same small model *without* our training scores **31%** and **27%**
+on these benchmarks (and never says "escalate" at all). The teaching is the
+entire product.
+
 ## The three findings
 
 ### 1. The reasoning recipe is a mirror: real win on fake data, real loss on real data
