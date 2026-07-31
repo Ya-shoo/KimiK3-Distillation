@@ -1,34 +1,39 @@
 # Distilling a Frontier Model into a 4B Specialist for Intent Triage: A Controlled Study on Two Benchmarks
 
-> **STATUS: DRAFT v2** (2026-07-30, M2 complete: 17/17 runs, 3 seeds/recipe both
-> benchmarks; **M3 frontier panel in** — §7.2/§8: 5 models on the test split, macro-F1
-> + cost). One number remains ⟦pending⟧: the **student's test macro-F1** — the 4090
-> selected epochs on val (correct discipline); scoring the best-epoch adapters on the
-> sacred test split, once, resolves the retention multiple (§7.2) and the money chart
-> (§8). Interpretation-bearing passages are marked **[OWNER REVIEW]** — the A/B/ablation
-> reading is the owner's call per the project's collaboration model.
+> **STATUS: FINAL v3** (2026-07-31). M1–M3 complete: 17/17 training runs (3 seeds ×
+> 3 recipes × 2 benchmarks + controls), five-model frontier panel scored on the
+> held-out test splits, and all six student test passes scored — each exactly once.
+> Every number in this document traces to a committed artifact under `artifacts/`;
+> the six headline test scores were independently recomputed from the raw
+> prediction files (`test_*_preds.jsonl`) and match the scorer output digit-for-digit.
+> The post-run concern list (`docs/TEST-EVAL-CONCERNS.md`) was worked through:
+> its two post-hoc analyses are folded into §7.4 and §7.6, and its framing
+> caveats into §7.5 and §9.
+> Companion reads: [`PAPER-UNDERGRAD.md`](PAPER-UNDERGRAD.md) (assumes intro-ML),
+> [`PAPER-ELI5.md`](PAPER-ELI5.md) (assumes nothing).
 
 ## 1. Abstract
 
 We distill Kimi K3 (a 2.8T-parameter frontier reasoning model) into Qwen3-4B, a
-~1000× smaller student, for support-ticket / assistant intent triage, and evaluate
-the *rationale-distillation* recipe ("Distilling Step-by-Step") with a controlled
+~1000× smaller student, for support-ticket / assistant intent triage, and test the
+*rationale-distillation* recipe ("Distilling Step-by-Step") with a controlled
 experiment on two benchmarks: Bitext (27 intents, synthetic) and CLINC150 (150
-intents + out-of-scope, real). A QLoRA student trained on ~2.8–5.7k gold-gated
-teacher labels reaches **0.9915 ± 0.0006** val macro-F1 on Bitext and
-**0.9611 ± 0.0008** on CLINC-151 (3 seeds). The controlled comparison yields a
-mirror-image result: the multi-task rationale recipe **wins on the synthetic
+intents + out-of-scope, real). On the held-out test splits — scored exactly once —
+the student does not merely retain the teacher's accuracy; it **exceeds it**:
+**0.9923** macro-F1 on Bitext (**104.5%** of the teacher's 0.9498, first place among
+all eight systems scored, including the teacher) and **0.9220** on CLINC-151
+(**101.6%** of the teacher's 0.9078, second place behind only Gemini 3 Flash).
+Five of six student passes clear the pre-registered ≥97.5% retention gate; the sole
+failure is the reason-then-label recipe on real data (96.1%), which also collapses
+out-of-scope recall to 0.26 and costs ~20× more to serve. The controlled ablation
+yields a mirror: training on the teacher's rationales **wins on the synthetic
 benchmark (+1.3 pt, ~8σ) and loses on the real one (−0.5 pt, ~4σ)** — the loss
-persisting when optimizer budget is step-matched — and the reason-then-label
-recipe collapses out-of-scope recall (0.30 vs 0.69), the metric a triage
-deployment relies on for escalation. Rationale distillation's benefit is not a
-property of the method alone but of the data distribution it meets. A five-model
-frontier panel scored on the test split places the teacher at 95.0/90.8 macro-F1
-(Bitext/CLINC) — and a cheaper generalist (Gemini 3 Flash) *beats* the teacher on the
-real benchmark (93.5 vs 90.8) at ~6× lower cost; the student's marginal inference cost
-is ~$0 (owned GPU) vs $190–$2,200 per million tickets/month for the cloud panel. The one
-open number is the student's own test macro-F1, scored once with the panel, which sets
-the final retention multiple.
+persisting under a step-matched optimizer-budget control — and the synthetic win
+localizes almost entirely to a single confusable label pair. Rationale
+distillation's benefit is a property of the data distribution, not of the method.
+The student's marginal inference cost is ~$0 on an owned GPU versus $190–$2,260
+per million tickets for the cloud panel; total one-time project spend (teacher
+labeling + panel) was under $100.
 
 ## 2. Introduction
 
@@ -40,19 +45,22 @@ specialist: a small model, trained on the frontier model's outputs for this one
 task, that runs on commodity hardware at ~zero marginal cost.
 
 This report asks two questions. **(1) How much of the teacher's accuracy does a
-4B student retain on intent triage?** (⟦pending⟧ — requires the K3 baseline scored
-by identical code, M3.) **(2) Does distilling the teacher's *reasoning* — not just
-its labels — measurably help,** as reported by Hsieh et al. (2023, "Distilling
-Step-by-Step"), **once optimizer budget, LR schedule, and checkpoint selection are
-properly controlled?** Our answer to (2) is *it depends on the data*: a robust yes
-(~8σ) on the synthetic benchmark, a robust no (~4σ) on the real one — see §7.3.
+4B student retain on intent triage?** Answer: all of it, and then some — 103–104%
+on the synthetic benchmark, 100–102% on the real one (§7.2), with the caveat that
+"retention above 100%" says as much about the baseline (a *prompted* generalist)
+as about the student (§9). **(2) Does distilling the teacher's *reasoning* — not
+just its labels — measurably help,** as reported by Hsieh et al. (2023,
+"Distilling Step-by-Step"), **once optimizer budget, LR schedule, and checkpoint
+selection are properly controlled?** Answer: *it depends on the data* — a robust
+yes (~8σ) on the synthetic benchmark, a robust no (~4σ) on the real one, with the
+ordering replicating exactly on the test splits (§7.3).
 
 ## 3. Background
 
 **Knowledge distillation** trains a student on a teacher's outputs. **Rationale
-distillation** additionally trains on the teacher's explanation of each label,
-on the theory that reasoning carries extra signal per example, improving accuracy
-or data-efficiency. We test three recipes (§5): label-only (**ablation**),
+distillation** additionally trains on the teacher's explanation of each label, on
+the theory that reasoning carries extra signal per example, improving accuracy or
+data-efficiency. We test three recipes (§5): label-only (**ablation**),
 reason-then-label in one sequence (**recipe B**), and a multi-task split where
 classification and explanation are separate training tasks and inference uses only
 the fast classification task (**recipe A**).
@@ -68,9 +76,11 @@ Both benchmarks are single-label intent classification, output as constrained JS
 | Splits | dedup-before-split, 0% leakage (hashes in `artifacts/`) | canonical CLINC splits (comparable to literature) |
 | Teacher-labeled subsample | 2,997 rows (111/class) | 6,040 rows (40/class) |
 | Val / test | 2,381 / 4,761 | 3,100 / 5,500 |
+| Test oos share | — | 18.2% (1,000/5,500) vs 3.2% on val |
 
 `oos` doubles as the deployment escalate signal: a query fitting no intent should
-be routed to a human. We report oos recall/precision alongside macro-F1.
+be routed to a human. We report oos recall/precision alongside macro-F1. Note the
+val/test **composition shift**: test is 18.2% oos vs 3.2% on val — it matters in §7.5.
 
 **Gold-gating.** The teacher labels each subsample row with a short rationale; rows
 where the teacher's label disagrees with the dataset's gold label are dropped (the
@@ -82,15 +92,17 @@ way. Keep rates: **95.5%** (Bitext, 2,861 kept) and **94.4%** (CLINC, 5,704 kept
 entirely; the student consequently scores **F1 = 0.0** on it (≈0.66 pt of macro-F1)
 and drags down its sibling. `distance` (30/40 dropped) and `insurance_change`
 (20/40) were partially evacuated the same way. The gate is not a free audit — it
-converts teacher confusions into training-set class deletions. Mitigation
-(back-filling gate-dropped classes with bare gold labels) is future work (§11).
+converts teacher confusions into training-set class deletions. The mitigation
+(back-filling gate-dropped classes with bare gold labels) was implemented and
+tested: it recovers `reminder_update` to F1 0.95 and lifts val macro-F1 to 0.9715
+(§7.6).
 
 ## 5. Method
 
 1. **Teacher labeling.** Kimi K3 (reasoning mode) labels each subsample row with
    `{evidence_to_intent, why_not_alternatives, category}` under a task-specific
-   prompt (`prompts/teacher*.md`). Bitext: 0 API errors, ~$15.86. CLINC: 10 errors
-   in 6,050 calls.
+   prompt (`prompts/teacher*.md`). Bitext: 0 API errors, $15.86. CLINC: 10 errors
+   in 6,050 calls, ~$35.
 2. **Gold-gate** (§4), then render three training sets per benchmark:
    - **ablation**: `query → {category}` (2,861 / 5,704 rows)
    - **recipe B**: `query → {evidence, why_not, category}` one sequence (same rows)
@@ -99,89 +111,107 @@ converts teacher confusions into training-set class deletions. Mitigation
 3. **Student.** Qwen3-4B, QLoRA (4-bit base, LoRA r=16 α=32 on attention+MLP),
    lr 2e-4 linear, 3 epochs, effective batch 32, max_seq_len 256, completion-only
    loss, per-epoch checkpoints. One config across all recipes — the recipe is the
-   only experimental variable. (Owner-set; coaching ranges in HANDOFF-M2-4090 §3.)
+   only experimental variable.
 4. **Constrained inference.** Category is decoded against the frozen label-space
    enum (lm-format-enforcer); recipe B free-runs first and constrained-re-decodes
    schema failures. Invalid/hallucinated outputs are scored **wrong**.
-5. **Selection discipline.** All tuning and epoch selection on val only; test is
-   scored exactly once, at M3, alongside the frontier panel.
+5. **Selection discipline.** All tuning and epoch selection on val only. The test
+   split was scored exactly once per system — the s42 checkpoint at its best-*val*
+   epoch, deterministic decode — alongside the frontier panel, with a shared scorer.
 
 ## 6. Setup
 
 - Student training: single RTX 4090 (24 GB), Unsloth 2026.7.5 / TRL 0.24 /
   transformers 5.5, bf16. Environment specifics and Windows-stack workarounds
   (staged epochs, WDDM livelock mitigations, batch-layout note): `docs/ENV-4090-WINDOWS.md`.
-- Teacher/panel pricing: pinned in `configs/prices.yaml` ⟦snapshot date at M3⟧.
+- Teacher/panel pricing pinned in `configs/prices.yaml` (OpenRouter list,
+  snapshot 2026-07-28/30); panel evaluated 2026-07-30/31.
 - Seeds: 42, 1337, 2024 (complete). Extra seeds are scored at the primary seed's
   best epoch (selection held fixed across seeds).
 - Metrics: macro-F1 (headline), accuracy, per-class F1, invalid rate, oos
-  recall/precision (CLINC). Scorer shared verbatim with the M3 panel.
+  recall/precision (CLINC). Scorer shared verbatim between students and panel;
+  headline test numbers independently recomputed from raw predictions.
 
 ## 7. Results
 
-### 7.1 Headline (val macro-F1, mean ± sample σ over seeds {42, 1337, 2024})
+### 7.1 Validation (macro-F1, mean ± sample σ over seeds {42, 1337, 2024})
 
 | Recipe | Bitext-27 (best @2) | CLINC-151 (best @3) | CLINC oos recall (mean) |
 |---|---|---|---|
 | Ablation (label-only) | 0.9788 ± 0.0013 | **0.9611 ± 0.0008** | 0.69 |
 | Ablation, step-matched 6-epoch control | — | **0.9624** (n=1) | 0.72 |
+| Ablation + gate back-fill (§7.6) | — | **0.9715** (n=1) | 0.72 |
 | Recipe A (multi-task) | **0.9915 ± 0.0006** | 0.9563 ± 0.0015 | 0.72 |
 | Recipe B (reason-then-label) | 0.9779 ± 0.0019 | 0.9317 ± 0.0013 | **0.30** |
 
 Invalid outputs: zero everywhere except CLINC recipe B (7–18 of 3,100 per seed,
-scored wrong) — all are token-budget exhaustion: the generated rationale overruns
-the 512-token cap before the `category` field is emitted, so even constrained
-re-decoding cannot rescue the row (§7.4).
+scored wrong) — all token-budget exhaustion: the rationale overruns the cap before
+`category` is emitted (§7.4).
 
-**Zero-shot reference:** the same base model without fine-tuning, same constrained
-decoding, scores **0.3148** (Bitext) and **0.2693** (CLINC; oos recall 0.00) —
-distillation contributes ~+66 macro-F1 points on both benchmarks
-(`artifacts/*/eval/zeroshot_base.json`).
+**Zero-shot reference (val split):** the same base model without fine-tuning, same
+constrained decoding, scores **0.3148** (Bitext) and **0.2693** (CLINC; oos recall
+0.00) on val — never run on test, so the test tables exclude it.
+Distillation contributes ~+66 macro-F1 points on both benchmarks — the fine-tuning
+is the entire product (`artifacts/*/eval/zeroshot_base.json`).
 
-### 7.2 The frontier panel (test macro-F1), and retention vs teacher
+### 7.2 Test — the leaderboard and the retention verdict
 
-We score a two-tier panel of prompted frontier/efficient models on the **held-out test
-split** (Bitext 4,761 / CLINC 5,500), label-only, with the *same* label glosses the
-teacher saw and the *same* `score.py` used for the student. All five produced **0%
-invalid** output; reasoning is disabled where the provider allows it, so this is the
-"just prompt a model for the label" regime a team actually compares against.
+Held-out test splits (Bitext 4,761 / CLINC 5,500), every system scored once by the
+same scorer: the three students (s42, best-val epoch) and a two-tier panel of five
+prompted cloud models, label-only prompt with identical label glosses, reasoning
+disabled, 0% invalid output from every panel model.
 
-| Model (tier) | Bitext-27 | CLINC-151 | Cost /1k tickets† |
+**Combined test leaderboard (macro-F1):**
+
+| System | Bitext-27 | CLINC-151 | $/1k tickets† |
 |---|---|---|---|
-| **Kimi K3 — teacher** (flagship) | **95.0** | 90.8 | $2.20 |
-| Gemini 3 Flash (flagship) | 93.6 | **93.5** | $0.39 |
-| GPT-5.6 Luna (efficient) | 93.6 | 89.6 | $0.35 |
-| DeepSeek 3.2 (efficient) | 93.2 | 86.6 | $0.19 |
-| Haiku 4.5 (efficient) | 87.9 | 88.3 | $0.79 |
+| **Student — recipe A** | **0.9923** ① | 0.9103 ③ | ~$0 |
+| **Student — ablation** | 0.9848 ② | **0.9220** ② | ~$0 |
+| **Student — recipe B** | 0.9801 ③ | 0.8724 ⑦ | ~$0 |
+| Kimi K3 — teacher (flagship) | 0.9498 ④ | 0.9078 ④ | $2.20 |
+| Gemini 3 Flash (flagship) | 0.9364 ⑤ | **0.9345** ① | $0.39 |
+| GPT-5.6 Luna (efficient) | 0.9360 ⑥ | 0.8957 ⑤ | $0.35 |
+| DeepSeek 3.2 (efficient) | 0.9324 ⑦ | 0.8665 ⑧ | $0.19 |
+| Haiku 4.5 (efficient) | 0.8788 ⑧ | 0.8832 ⑥ | $0.79 |
 
-† List API prices (`configs/prices.yaml`, snapshot 2026-07-30) × measured mean tokens
-(§8). Panel run cost: $22 on OpenRouter. The two priciest flagships — GPT-5.6 Sol ($5/$30)
-and Fable 5 ($10/$50) — were scoped out on cost.
+† List API prices × measured mean tokens (§8); students run on an owned GPU.
 
-**Panel finding — the teacher is not the ceiling on real data.** On CLINC, **Gemini 3
-Flash (93.5) beats the K3 teacher (90.8) by 2.7 pt at ~6× lower cost.** K3 leads on the
-synthetic Bitext (95.0) but trails on the real, 151-class benchmark — a second mirror to
-the §7.3 recipe mirror. "Retention of K3" is therefore a floor, not a ceiling, for what a
-specialist could reach on the real task.
+**Retention vs the teacher (the pre-registered ≥97.5% gate, SPEC §1):**
 
-**Retention (student vs K3 on test).** K3's test macro-F1 — the denominator for the
-≥97.5% retention target (SPEC §1) — is **95.0 (Bitext) / 90.8 (CLINC)**. The numerator,
-the student's own **test** macro-F1, is the one number still in flight: epoch selection
-was on *val* (correct discipline) and the sacred test set is scored exactly once, for
-student and panel together. The panel half is done (above); the student half — best-epoch
-adapters on `test_eval.jsonl` — is the final measurement, after which the retention ratio
-and the money chart (§8) resolve. For scale: the strongest students already reach **0.9915
-± 0.0006 (Bitext, recipe A)** and **0.9611 ± 0.0008 (CLINC, ablation; 0.9715 with
-gate-backfill)** on *val* — at or above K3's *test* number on the same metric, which is
-exactly why a same-split test read is what makes the retention claim rigorous rather than
-suggestive.
+| Recipe | Bitext test (ret.) | CLINC test (ret.) | Gate |
+|---|---|---|---|
+| Ablation | 0.9848 (**103.7%**) | 0.9220 (**101.6%**) | pass / pass |
+| Recipe A | 0.9923 (**104.5%**) | 0.9103 (**100.3%**) | pass / pass |
+| Recipe B | 0.9801 (**103.2%**) | 0.8724 (**96.1%**) | pass / **FAIL** |
 
-### 7.3 The ablation result: a benchmark-dependent mirror **[OWNER REVIEW]**
+Findings:
 
-Recipe A beats the ablation on Bitext by **+1.27 pt at ~8σ** (0.9915 ± 0.0006 vs
-0.9788 ± 0.0013) and loses to it on CLINC by **−0.48 pt at ~4σ** (0.9563 ± 0.0015
-vs 0.9611 ± 0.0008). Both effects are far outside seed noise; recipe B never beats
-the ablation anywhere. Controls that make the inversion hard to dismiss:
+- **Retention was a floor, not a ceiling.** Five of six passes exceed the teacher
+  outright. The best student per benchmark beats K3 by +4.3 pt (Bitext) and
+  +1.4 pt (CLINC). §9 explains why this is not paradoxical — the students'
+  supervision was gold-gated, and the teacher competes as a *prompted* generalist.
+- **The recipe ordering replicates on test with no generalization surprise.**
+  Bitext: A > ablation > B, every recipe scoring slightly *above* its val
+  seed-mean (+0.1 to +0.6 pt). CLINC: ablation > A > B, exactly as on val. The
+  benchmark-mirror (§7.3) is a test-set fact, not a val artifact.
+- **The teacher is not the accuracy ceiling on real data.** Gemini 3 Flash
+  (93.5) beats K3 (90.8) on CLINC at ~6× lower cost, while K3 leads the panel on
+  synthetic Bitext — the panel mirrors the recipe mirror.
+- **Recipe B fails everything at once**: the only retention-gate failure (96.1%),
+  the only invalid outputs (71/5,500; 1.3%, counted as errors by the scorer), the
+  worst oos collapse (§7.4), and a ~20× wall-clock premium *on our eval harness*
+  (125.6 vs ~6.5 min per test pass). The harness-independent part of that premium
+  is the token asymmetry (~512 vs ~32 max new tokens per query); a tuned serving
+  stack would compress the wall-clock gap, not the token gap.
+
+### 7.3 The ablation result: a benchmark-dependent mirror
+
+Recipe A beats the ablation on Bitext by **+1.27 pt at ~8σ** on val (0.9915 ±
+0.0006 vs 0.9788 ± 0.0013; +0.75 pt on test) and loses to it on CLINC by
+**−0.48 pt at ~4σ** (0.9563 ± 0.0015 vs 0.9611 ± 0.0008; −1.17 pt on test). Both
+effects are far outside seed noise; recipe B never beats the ablation anywhere.
+Controls that make the inversion hard to dismiss:
+
 - **Step-matching (CLINC):** recipe A sees 2 rows/query, so at equal epochs it
   gets ~2× the optimizer steps. The 6-epoch ablation control (1,074 steps ≈ A's
   1,071) still beats A (0.9624 vs 0.9563 ± 0.0015) — the multi-task signal
@@ -190,8 +220,18 @@ the ablation anywhere. Controls that make the inversion hard to dismiss:
   full-run LR schedule, per-epoch checkpoints, and val-based selection. The
   suspected Bitext schedule artifact was tested directly and refuted (§9).
 
-Candidate readings for the mirror: (i) Bitext's templated inputs reward the
-richer training signal — rationales effectively teach the template grammar —
+**Where the Bitext win actually lives.** Per-class decomposition of the test gap:
+recipe A's advantage concentrates almost entirely in the benchmark's one known
+confusable pair, `delivery_period` ↔ `track_order` — the pair on which the
+*teacher itself* scores worst (0.70/0.77). Recipe A: **0.9975 / 0.9900**; ablation:
+0.8678 / 0.8671; recipe B: 0.8883 / 0.8843. Those two classes alone contribute
+~0.94 pt of the 0.75 pt total gap (the remaining classes net slightly *against*
+A). The rationale signal did not diffusely improve classification; it taught the
+student the boundary convention between two overlapping intents.
+
+Candidate readings for the mirror (interpretation, not measurement): (i) Bitext's
+templated inputs reward the richer training signal — rationales effectively teach
+the template grammar, including the boundary between near-duplicate intents —
 while CLINC's short real queries carry the label near the surface, so the
 rationale adds gradient noise, not information; (ii) at fixed LoRA capacity
 (r=16), rationale learning competes with label learning, and only pays where the
@@ -199,35 +239,91 @@ task is compositional enough to amortize it; (iii) synthetic benchmarks can
 overstate rationale-distillation gains generally — a caution for the literature,
 since method papers frequently evaluate on clean/templated data.
 
-### 7.4 The oos/escalate collapse under reason-then-label **[OWNER REVIEW]**
+### 7.4 The oos/escalate collapse under reason-then-label
 
-Recipe B's oos recall on CLINC is **0.30 mean (0.26–0.35) across all three seeds**
-vs 0.69–0.72 for both label-only-at-inference recipes, with precision comparable.
+Recipe B's oos recall on CLINC is **0.30 mean (0.26–0.35) across all seeds on
+val** and **0.264 on test** (oos F1 0.41), vs 0.59–0.69 test recall for the two
+label-only-at-inference recipes, with precision comparable (~0.97 everywhere).
 Reading: generating the rationale first commits the model to
 evidence-for-some-intent before the label token is emitted — the rationale format
 has no natural "this fits nothing" path, so probability mass flows to the nearest
-in-scope intent. The same mechanism produces recipe B's only-in-the-project
-invalid outputs: rationales that ramble past the generation budget before the
-label appears. For deployments where escalation is the point of the system, these
-are arguments against rationale-in-the-output regardless of macro-F1.
+in-scope intent.
 
-### 7.5 Learning curves and epoch knees
+**Post-hoc decomposition (from the committed test predictions): the format
+failure and the oos failure are one phenomenon.** 882 of 5,500 test rows (16%)
+failed schema validation on the free-decode pass and went through constrained
+retry — and **752 of those 882 are gold-oos rows** (85%; 75.2% of all oos).
+Clean-pass rows: accuracy 0.909, zero invalids. Retried rows: accuracy 0.30. The
+71 invalid outputs are all retry-path rows whose 512-token decode budget
+truncates before the label field even under constraint (an intrinsic ~7.7%
+retry-path rate; an LMFE MemoryError late in the run was checked and cleared —
+the budget, not the error, is the mechanism), and 66 of the 71 are gold-oos.
+The model does register that these inputs fit nothing — but the signal escapes
+as *malformed output* rather than as the `oos` label: "needed retry" detects oos
+with recall 0.752 / precision 0.853, far better than the model's own predictions
+(recall 0.264), and even 206 of its 273 explicit oos calls surface via the retry
+path. Recipe B's in-scope labeling is also genuinely weaker (in-scope-conditional
+macro-F1 0.931 vs the ablation's 0.958), so the gate failure is not format alone —
+but the escalation collapse is largely the format channel swallowing the
+escalation signal. For deployments where escalation is the point of the system,
+this disqualifies rationale-in-the-output regardless of macro-F1 (or demands the
+inverted trick: treat schema failure itself as the escalate flag).
+
+**But note the panel's counterpoint (§7.6 table): every prompted flagship beats
+every student on oos F1.** Teacher 0.878, Gemini 0.904, vs best student 0.762.
+The specialist wins the in-scope leaderboard while remaining materially worse at
+knowing what it doesn't know — the thinnest slice of its training data (≤40 oos
+rows). Escalation quality is the real gap between this student and the cloud, and
+the first thing Phase 2 should buy (oos oversampling / threshold head).
+
+### 7.5 Val→test generalization: composition shift, not overfitting
+
+CLINC headline scores drop 3.9–5.9 pt from val to test. Decomposition shows this
+is **exam-shape change, not model degradation**: test is 18.2% oos vs 3.2% on
+val. Conditioning on gold in-scope rows only (removing oos from both sides), the
+ablation's macro-F1 goes **0.9676 (val) → 0.9581 (test)** — a 0.95 pt shift. The
+remaining headline drop is oos composition: 376 of 1,000 oos rows misfire into
+in-scope intents, hitting per-class precision across 150 classes, while macro-F1
+(oos = 1 class of 151) hides the traffic-weighted damage that accuracy shows
+(0.9220 macro vs 0.8985 accuracy). Deployments should read the accuracy column.
+On Bitext there is no gap at all: every recipe's test score is *above* its val
+seed-mean (+0.1 to +0.6 pt).
+
+A selection-side corollary: epoch selection optimized val macro-F1, a metric in
+which oos carries 1/151 of the weight on a split that is 3.2% oos — so checkpoint
+choice was nearly blind to the class that dominates test error mass. No hygiene
+was violated (selection never touched test), but a different epoch might trade
+in-scope F1 for oos recall and this protocol would not see it.
+
+### 7.6 Prompting cannot express what fine-tuning can learn: `reminder_update`
+
+Every prompted model in the study — teacher included, Gemini included — scores
+**F1 = 0.0 on `reminder_update`** on the CLINC test set. Under this label
+glossary the class is effectively *un-promptable*: no panel model ever separates
+it from `reminder`. The confusion is a clean drain, not a scatter — the teacher
+and Gemini predict `reminder` for **30 of 30** gold `reminder_update` test rows
+(students: 22–28 of 30) — making this CLINC's exact analogue of Bitext's
+`delivery_period`↔`track_order` twin pair: every benchmark here carries one
+near-duplicate label pair that only weight updates ever resolve. The gold-gate consequently evacuated it from training (§4),
+and the un-back-filled students score 0.0 as well. The back-fill mitigation
+(gate-dropped classes restored with bare gold labels, no rationale) recovers it
+to **F1 0.947** and lifts CLINC val macro-F1 to **0.9715** (n=1 seed, val-only —
+not test-scored, honestly labeled as such). A fine-tuned 4B learns a label
+distinction that prompting a 2.8T model cannot elicit; distillation ceilings are
+not prompting ceilings.
+
+### 7.7 Learning curves and epoch knees
 
 Bitext: all recipes peak at epoch 2 of 3 (val F1 dips at 3 while train loss keeps
-falling — mild overfit past the knee). CLINC: all recipes still improve at epoch 3;
-the 6-epoch control shows the knee is exactly 3 (0.9624 @3, then flat: 0.9596 /
-0.9614 / 0.9617 at 4/5/6). Curves: `artifacts/*/eval/epoch_scores_*.json`.
-
-### 7.6 Cost / speed — ⟦pending M3 measured tokens + pinned prices⟧
-Recipe A's design goal survives regardless of §7.3: label-only inference emits
-~10 output tokens per query (24 t/s batched classify on one 4090 vs 3.9 t/s for
-reason-mode — a 6× serving-cost difference against recipe B).
+falling — mild overfit past the knee). CLINC: all recipes still improve at epoch
+3; the 6-epoch control shows the knee is exactly 3 (0.9624 @3, then flat:
+0.9596/0.9614/0.9617 at 4/5/6). Curves: `artifacts/*/eval/epoch_scores_*.json`.
 
 ## 8. Cost analysis
 
-Cost per ticket is `mean_input_tokens × input_price + mean_output_tokens × output_price`
-at the pinned list prices (`configs/prices.yaml`, snapshot 2026-07-30). Inputs are ~660–690
-tokens (the shared label-glossary prompt); label-only outputs are ~10–15 tokens, so **input
+Cost per ticket is `mean_input_tokens × input_price + mean_output_tokens ×
+output_price` at pinned list prices. Inputs are ~660–710 tokens (the shared
+label-glossary prompt); label-only outputs are ~10–15 tokens, so **input
 dominates** — the cost axis is essentially "price per prompt."
 
 **Savings at scale (1M tickets/month), list API prices:**
@@ -241,77 +337,114 @@ dominates** — the cost axis is essentially "price per prompt."
 | DeepSeek 3.2 | $0.19 | $190 |
 | **Student (Qwen3-4B, local)** | **≈$0** | **≈$0 (electricity)** |
 
-The student's marginal inference cost is electricity: recipe A emits ~10 output tokens per
-query and batched `classify` runs at ~24 tok/s on one owned 4090, so 1M tickets/month (~0.4
-queries/s sustained) is served comfortably by hardware the project already owns. Against the
-**cheapest cloud option (DeepSeek, $190/mo)** the specialist saves ~$190/mo per million
-tickets; against the **teacher ($2,200/mo)**, ~$2,200/mo — before the ~6× serving-speed edge
-of label-only inference over reason-mode (§7.6). Break-even on the one-time ~$16 (Bitext) /
-~$35 (CLINC) teacher-labeling spend plus a few GPU-hours is days, not months, at any
-realistic volume.
+The student's marginal cost is electricity: label-only inference emits ~10 output
+tokens per query and runs at ~14 tickets/s on one owned 4090 (measured on the
+5,500-row test pass), so 1M tickets/month (~0.4 queries/s sustained) is served
+comfortably by hardware the project already owns. Against the cheapest cloud
+option (DeepSeek, $190/mo) the specialist saves ~$190/mo per million tickets —
+*and outscores it on both benchmarks*; against the teacher, ~$2,200/mo. One-time
+costs: $15.86 + ~$35 teacher labeling, ~$22 panel evaluation (OpenRouter; $40
+list), a few GPU-hours of training (individual runs: 1–9 minutes). Break-even at
+any realistic volume is days. The recipe choice compounds the economics: recipe
+A/ablation serve at ~14 tickets/s vs recipe B's 0.7 on this eval harness — and
+by its ~16× output-token budget, the recipe that scores worst stays the most
+expensive to serve under any stack.
 
-**The hero figure (`money_chart`: cost/1k on a log x-axis vs test macro-F1)** places every
-panel model from the §7.2 table; the student's point — high-and-left, at ~$0 and its test
-macro-F1 — lands once the 4090 test scores arrive. The panel points already show the shape:
-flagships high-and-right (K3 $2.2, accurate), efficient tier clustered mid-left
-(DeepSeek/Luna/Gemini $0.2–0.4), and a wide-open cheap-and-accurate corner for the specialist.
+**The money chart** (cost/1k, log x-axis, vs test macro-F1): the student sits in
+the formerly empty cheap-and-accurate corner — top-left — on both benchmarks; on
+Bitext it is also simply the top point. Flagships sit high-right (K3 at $2.2);
+the efficient tier clusters mid-left ($0.19–0.79) below the student's accuracy on
+Bitext and (except Gemini) on CLINC.
 
 ## 9. Threats to validity
 
+- **"Beats the teacher" needs its asterisk.** Two mechanisms make >100% retention
+  unremarkable rather than paradoxical. (1) The student's supervision is not raw
+  teacher output: gold-gating filtered out the ~5% of teacher labels that
+  disagreed with gold, so surviving supervision is effectively gold-quality — the
+  gate injects gold-label information into the pipeline (as a *filter*, never as
+  training text). (2) The comparison is a fine-tuned in-domain specialist vs a
+  *prompted zero-shot* generalist; on Bitext the student additionally learns the
+  dataset's labeling *conventions* (e.g. the delivery_period/track_order
+  boundary) that no prompted model can infer from a glossary. The retention
+  denominator is therefore "the best score achievable by *prompting* the
+  teacher," not an intrinsic teacher capability — and exceeding it is the
+  expected outcome on a closed-set task, not an anomaly. The honest claim is
+  not "4B > 2.8T" but "for a fixed narrow task, a fine-tuned 4B beats prompting
+  anything we tested."
 - **Bitext is synthetic**; its near-ceiling scores overstate real-world accuracy.
-  Mitigated by CLINC (real) + oos.
+  Mitigated by CLINC (real) + oos reporting.
 - **A suspected artifact was found, tested, and refuted.** A post-run audit
   flagged three asymmetries favoring the original Bitext recipe-A run (a
-  per-stage LR-scheduler rebuild that produced a warm-restart sawtooth; annealed
-  checkpoints vs others' mid-decay snapshots; 2× optimizer steps at equal
-  epochs). The corrected re-run scored *higher* (0.9920 vs 0.9886), refuting the
-  inflation hypothesis; all reported seed statistics use fixed-schedule runs
-  only, and the legacy run is retained in the artifacts for the record. Audit
-  trail (trainer-log LR curves): `artifacts/eval/`.
+  per-stage LR-scheduler rebuild producing a warm-restart sawtooth; annealed
+  checkpoints; 2× optimizer steps at equal epochs). The corrected re-run scored
+  *higher* (0.9920 vs 0.9886), refuting the inflation hypothesis; all reported
+  seed statistics use fixed-schedule runs only; the legacy run is retained in the
+  artifacts. Audit trail: trainer-log LR curves, `artifacts/eval/`.
 - **A mid-experiment memory-layout change** (per-device batch 32×1 → 16×2 after a
-  Windows VRAM livelock; identical effective batch, step count, and schedule) is
-  recorded per run in `run_config_*.json`. Gradient-reduction order is the only
-  difference; observed seed σ (≤0.002) bounds its effect.
+  Windows VRAM livelock; identical effective batch, step count, schedule) is
+  recorded per run in `run_config_*.json`; observed seed σ (≤0.002) bounds its
+  effect.
 - **Label noise:** Bitext `delivery_period↔track_order` caps ablation/B per-class
-  F1; CLINC `reminder`/`reminder_update` (and kin) is severe enough to evacuate
-  classes through the gold-gate (§4).
-- **Seed count is 3** — adequate for the large effects reported (4–8σ), thin for
-  sub-0.2-pt comparisons (e.g. ablation vs its 6-epoch control, or ablation vs
-  recipe B on Bitext, which are statistical ties at this n).
-- **Teacher prompt fairness across benchmarks:** the student prompts are identical
-  across benchmarks by design (frozen recipe); the teacher prompt was adapted per
-  benchmark (label glosses, oos instruction).
-- **Price drift** ⟦pinned at M3⟧.
+  F1 and is where recipe A's entire win concentrates (§7.3) — if those gold
+  conventions are themselves arbitrary, recipe A's Bitext advantage is learning
+  an arbitrary convention (it remains an advantage on the benchmark as defined).
+  CLINC `reminder`/`reminder_update` is severe enough to evacuate classes through
+  the gate (§4) and is unresolvable by any prompted model in the panel (§7.6).
+- **Seed count is 3**, and test is single-seed (s42) by design — adequate for the
+  4–8σ effects reported; thin for sub-0.2 pt comparisons (ablation vs its
+  6-epoch control; ablation vs B on Bitext val — statistical ties). Every
+  recipe-vs-recipe *test* delta therefore borrows val-measured σ as its
+  uncertainty proxy (the deltas are 5–15× that σ, but test carries no error bars
+  of its own). The back-fill result is n=1, val-only.
+- **Test scored once** means no test-side error bars; val→test deltas (+0.1 to
+  +0.6 pt Bitext; explained on CLINC, §7.5) bound the concern.
+- **Teacher prompt fairness:** student prompts identical across benchmarks by
+  design; the teacher prompt was adapted per benchmark (label glosses, oos
+  instruction). Panel models all received the same label-only prompt per
+  benchmark.
+- **Price drift:** prices pinned at snapshot 2026-07-28/30; K3's reasoning-token
+  billing (thinking tokens billed as output) is included in its measured cost.
 
 ## 10. Overfitting discipline
 
-Train/val/test with test-scored-once (M3). Val-only tuning; per-epoch checkpoints;
-knees measured per benchmark (§7.5); train-loss-vs-val-F1 gap logged per epoch in
+Train/val/test with test-scored-once. Val-only tuning; per-epoch checkpoints;
+knees measured per benchmark (§7.7); train-loss-vs-val-F1 gap logged per epoch in
 `artifacts/*/eval/findings.json`. The ablation memorizes its label-only train set
 (loss ≈ 0 by epoch 2) while val F1 still improves — memorization of a small
-per-class sample is not, by itself, the failure mode here.
+per-class sample is not, by itself, the failure mode here. The end-to-end
+evidence: Bitext test scores land *above* val means, and the CLINC val→test drop
+decomposes into a documented composition shift (§7.5), not overfitting.
 
 ## 11. Limitations and future work
 
-- **K3 baseline + frontier panel (M3)** — the retention claim, the money chart.
-- **Back-fill gate-evacuated classes** with bare gold labels (recovers
-  `reminder_update` without trusting contaminated rationales).
+- **Escalation is the remaining gap** (§7.4): every flagship beats every student
+  on oos F1. Phase 2: oversample oos, or add a calibrated escalate threshold;
+  re-measure on test *once*.
+- **Back-fill to all seeds + test**: the 0.9715 val result is n=1; promote it to
+  the headline recipe only after seed replication and its single test scoring.
 - **Data-efficiency curves** (10/20/30/40 per class): the strongest remaining case
   for rationales is fewer-examples-needed, untested here.
 - Single student size; a 1.7B/4B/8B frontier is cheap to add (targets are
   model-agnostic).
-- Phase 2: priority/escalate fields on owned data; OOD probe of Bitext-trained
-  students on real phrasings.
+- Phase 2 proper: priority/escalate heads on owned DailyDles data; OOD probe of
+  Bitext-trained students on real phrasings.
 
-## 12. Conclusion — ⟦finalized after M3; the honest arc so far:⟧ **[OWNER REVIEW]**
-A 4B QLoRA student trained on a few thousand gold-gated frontier labels is a
-strong intent-triage specialist on both a synthetic (0.99) and a real (0.96)
-benchmark. The fashionable part of the recipe — distilling rationales — turned
-out to be a property of the data, not the method: a large, real win on templated
-data that inverts into a significant loss on real queries, with the
-reason-then-label variant additionally destroying the escalation signal.
-Distillation earns its keep; whether the rationale garnish does depends on
-whether your data looks like a template or like people.
+## 12. Conclusion
+
+A 4B QLoRA student trained on a few thousand gold-gated frontier labels doesn't
+just retain a 2.8T teacher's intent-triage accuracy — it beats the teacher on
+both benchmarks and tops the entire eight-system leaderboard on one of them, at
+~$0 marginal cost vs $190–$2,200 per million tickets for the cloud. The
+fashionable part of the recipe — distilling rationales — turned out to be a
+property of the data, not the method: a large, real win on templated data
+(localized to one confusable label pair) that inverts into a significant loss on
+real queries, with the reason-then-label variant additionally destroying the
+escalation signal, failing the retention gate, and costing 20× more to serve.
+The residual case for the cloud is exactly one number: prompted flagships still
+know what they don't know better than the specialist does (oos F1 0.88–0.90 vs
+0.76). Distill for the task you can name; keep the escalation path humble; and
+distrust any rationale-distillation result demonstrated only on synthetic data.
 
 ## Appendix A. Reproducibility
 
@@ -320,4 +453,6 @@ Frozen label spaces, split manifests and hashes, subsample manifests:
 (committed). Exact commands: `README`/`HANDOFF-M2-4090.md`; per-run configs incl.
 git commit, seed, knobs: `artifacts/*/eval/run_config_*.json`. Environment lock:
 `uv.lock` + `docs/ENV-4090-WINDOWS.md`. Adjustment changelog + caveats:
-`artifacts/*/eval/findings.json`.
+`artifacts/*/eval/findings.json` (+ `test_eval` blocks). Panel raw scores:
+`artifacts/*/eval/panel/`. Test predictions for independent rescoring:
+`artifacts/*/eval/test_*_preds.jsonl` against `data/*/train/test_eval.jsonl`.
