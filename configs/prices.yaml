@@ -9,10 +9,10 @@ models:
     cached_input: 0.30          # 90% off cache-hit input (our static system prompt caches well)
     note: "Reasoning model — internal thinking tokens are billed as OUTPUT ($15/M)."
   anthropic-fable-5:
-    provider: claude-code-subscription
-    input: null                 # report LIST API price for a fair cost axis...
-    output: null                # ...even though marginal cost via the sub is ~0
-    note: "Fable 5 via Claude Code sub. Cost axis uses list API price so it's comparable."
+    provider: openrouter        # OpenRouter live price (2026-07-30); priciest model in the panel
+    input: 10.0
+    output: 50.0
+    note: "Fable 5 via OpenRouter (anthropic/claude-fable-5). Batch variant is half price but async-only."
   gpt-5.6-sol:
     provider: openrouter
     input: 5.0

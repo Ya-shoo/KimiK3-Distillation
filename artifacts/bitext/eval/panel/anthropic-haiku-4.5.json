@@ -1,0 +1,71 @@
+{
+  "model_key": "anthropic-haiku-4.5",
+  "model": "anthropic/claude-haiku-4.5",
+  "tier": "efficient",
+  "label": "Haiku 4.5",
+  "price_key": "haiku-4.5",
+  "n_scored": 4761,
+  "n_preds": 4761,
+  "transport_errors": 0,
+  "macro_f1": 0.8787583167959083,
+  "accuracy": 0.8651543793320731,
+  "invalid": 0,
+  "invalid_rate": 0.0,
+  "worst_classes": [
+    [
+      0.5447,
+      "contact_customer_service"
+    ],
+    [
+      0.6766,
+      "complaint"
+    ],
+    [
+      0.7664,
+      "review"
+    ],
+    [
+      0.773,
+      "set_up_shipping_address"
+    ],
+    [
+      0.8103,
+      "registration_problems"
+    ]
+  ],
+  "mean_input_tokens": 718.2,
+  "mean_output_tokens": 16.8,
+  "total_reasoning_tokens": 0,
+  "cost_per_1k_tickets_list": 0.80196,
+  "spend_list_usd": 3.8182,
+  "spend_openrouter_usd": 3.8182,
+  "per_class_f1": {
+    "cancel_order": 0.9565,
+    "change_order": 0.9787,
+    "change_shipping_address": 0.8714,
+    "check_cancellation_fee": 0.9757,
+    "check_invoice": 0.8961,
+    "check_payment_methods": 1.0,
+    "check_refund_policy": 0.9266,
+    "complaint": 0.6766,
+    "contact_customer_service": 0.5447,
+    "contact_human_agent": 0.8895,
+    "create_account": 0.9474,
+    "delete_account": 0.9544,
+    "delivery_options": 0.9672,
+    "delivery_period": 0.8513,
+    "edit_account": 0.8997,
+    "get_invoice": 0.9153,
+    "get_refund": 0.8153,
+    "newsletter_subscription": 0.9949,
+    "payment_issue": 0.8932,
+    "place_order": 0.8757,
+    "recover_password": 0.9632,
+    "registration_problems": 0.8103,
+    "review": 0.7664,
+    "set_up_shipping_address": 0.773,
+    "switch_account": 0.8203,
+    "track_order": 0.8547,
+    "track_refund": 0.9085
+  }
+}

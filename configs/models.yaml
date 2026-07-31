@@ -16,15 +16,16 @@ panel:
   # Fable 5 + Haiku run free via the Claude Code sub; the rest are metered on OpenRouter
   # (same TEACHER_API_KEY). Eval is label-only (Recipe A emits label-only at inference).
   # Cost axis reports LIST API prices so free-via-sub models are compared fairly.
+  # `price_key` -> the row in prices.yaml used for the cost axis; `label` -> chart display name.
   # --- flagship tier (recognition: "if you threw the best at it") ---
-  kimi-k3-teacher:       {tier: flagship,  provider: openrouter,     model: "moonshotai/kimi-k3"}           # teacher + panel entry
-  openai-gpt-5.6-sol:    {tier: flagship,  provider: openrouter,     model: "openai/gpt-5.6-sol"}           # $5/$30
-  google-gemini-3-flash: {tier: flagship,  provider: openrouter,     model: "google/gemini-3-flash-preview"}
-  anthropic-fable-5:     {tier: flagship,  provider: claude-code-cli, model: "claude-fable-5"}              # free via sub
+  kimi-k3-teacher:       {tier: flagship,  provider: openrouter,     model: "moonshotai/kimi-k3",            price_key: kimi-k3,          label: "Kimi K3 (teacher)"}  # teacher + panel entry
+  openai-gpt-5.6-sol:    {tier: flagship,  provider: openrouter,     model: "openai/gpt-5.6-sol",            price_key: gpt-5.6-sol,      label: "GPT-5.6 Sol"}        # $5/$30
+  google-gemini-3-flash: {tier: flagship,  provider: openrouter,     model: "google/gemini-3-flash-preview", price_key: gemini-3-flash,   label: "Gemini 3 Flash"}
+  anthropic-fable-5:     {tier: flagship,  provider: openrouter,     model: "anthropic/claude-fable-5",       price_key: anthropic-fable-5, label: "Fable 5"}           # OpenRouter $10/$50 (was: free-via-sub; CLI didn't scale to full test sets)
   # --- efficient tier (the cheap cloud option a team would really deploy) ---
-  anthropic-haiku-4.5:   {tier: efficient, provider: claude-code-cli, model: "claude-haiku-4-5"}            # free via sub
-  openai-gpt-5.6-luna:   {tier: efficient, provider: openrouter,     model: "openai/gpt-5.6-luna"}          # cheap tier of the same GPT-5.6 line
-  deepseek-v3.2:         {tier: efficient, provider: openrouter,     model: "deepseek/deepseek-v3.2"}
+  anthropic-haiku-4.5:   {tier: efficient, provider: openrouter,     model: "anthropic/claude-haiku-4.5",     price_key: haiku-4.5,        label: "Haiku 4.5"}          # OpenRouter $1/$5 (was: free-via-sub)
+  openai-gpt-5.6-luna:   {tier: efficient, provider: openrouter,     model: "openai/gpt-5.6-luna",           price_key: gpt-5.6-luna,     label: "GPT-5.6 Luna"}       # cheap tier of the same GPT-5.6 line
+  deepseek-v3.2:         {tier: efficient, provider: openrouter,     model: "deepseek/deepseek-v3.2",         price_key: deepseek-v3.2,    label: "DeepSeek 3.2"}
 
 student:
   qwen3-4b:

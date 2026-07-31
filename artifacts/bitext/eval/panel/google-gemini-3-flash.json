@@ -1,0 +1,71 @@
+{
+  "model_key": "google-gemini-3-flash",
+  "model": "google/gemini-3-flash-preview",
+  "tier": "flagship",
+  "label": "Gemini 3 Flash",
+  "price_key": "gemini-3-flash",
+  "n_scored": 4761,
+  "n_preds": 4761,
+  "transport_errors": 0,
+  "macro_f1": 0.9363981256033369,
+  "accuracy": 0.9367779878176854,
+  "invalid": 0,
+  "invalid_rate": 0.0,
+  "worst_classes": [
+    [
+      0.8175,
+      "switch_account"
+    ],
+    [
+      0.8204,
+      "delivery_period"
+    ],
+    [
+      0.8333,
+      "track_order"
+    ],
+    [
+      0.8607,
+      "edit_account"
+    ],
+    [
+      0.8705,
+      "contact_customer_service"
+    ]
+  ],
+  "mean_input_tokens": 689.0,
+  "mean_output_tokens": 13.5,
+  "total_reasoning_tokens": 0,
+  "cost_per_1k_tickets_list": 0.38513,
+  "spend_list_usd": 1.8336,
+  "spend_openrouter_usd": 1.8336,
+  "per_class_f1": {
+    "cancel_order": 0.9881,
+    "change_order": 1.0,
+    "change_shipping_address": 0.9458,
+    "check_cancellation_fee": 0.9811,
+    "check_invoice": 0.8961,
+    "check_payment_methods": 0.9975,
+    "check_refund_policy": 0.944,
+    "complaint": 0.9375,
+    "contact_customer_service": 0.8705,
+    "contact_human_agent": 0.9252,
+    "create_account": 0.9711,
+    "delete_account": 0.9882,
+    "delivery_options": 0.9798,
+    "delivery_period": 0.8204,
+    "edit_account": 0.8607,
+    "get_invoice": 0.9186,
+    "get_refund": 0.8929,
+    "newsletter_subscription": 1.0,
+    "payment_issue": 0.9716,
+    "place_order": 0.9773,
+    "recover_password": 0.9819,
+    "registration_problems": 0.9659,
+    "review": 0.9272,
+    "set_up_shipping_address": 0.9268,
+    "switch_account": 0.8175,
+    "track_order": 0.8333,
+    "track_refund": 0.9638
+  }
+}

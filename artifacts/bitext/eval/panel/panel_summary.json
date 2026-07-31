@@ -1,0 +1,364 @@
+{
+  "dataset": "bitext",
+  "split": "test",
+  "n": 4761,
+  "reasoning_openrouter": "off",
+  "prompt": "label-only (shared)",
+  "models": [
+    {
+      "model_key": "kimi-k3-teacher",
+      "model": "moonshotai/kimi-k3",
+      "tier": "flagship",
+      "label": "Kimi K3 (teacher)",
+      "price_key": "kimi-k3",
+      "n_scored": 4761,
+      "n_preds": 4761,
+      "transport_errors": 0,
+      "macro_f1": 0.9497906796085511,
+      "accuracy": 0.9502205419029616,
+      "invalid": 0,
+      "invalid_rate": 0.0,
+      "worst_classes": [
+        [
+          0.7039,
+          "delivery_period"
+        ],
+        [
+          0.7692,
+          "track_order"
+        ],
+        [
+          0.8802,
+          "contact_customer_service"
+        ],
+        [
+          0.9137,
+          "switch_account"
+        ],
+        [
+          0.9398,
+          "get_refund"
+        ]
+      ],
+      "mean_input_tokens": 691.9,
+      "mean_output_tokens": 12.4,
+      "total_reasoning_tokens": 0,
+      "cost_per_1k_tickets_list": 2.26228,
+      "spend_list_usd": 10.7707,
+      "spend_openrouter_usd": 4.3192,
+      "per_class_f1": {
+        "cancel_order": 0.982,
+        "change_order": 1.0,
+        "change_shipping_address": 0.9458,
+        "check_cancellation_fee": 0.9811,
+        "check_invoice": 0.9577,
+        "check_payment_methods": 0.9975,
+        "check_refund_policy": 0.9922,
+        "complaint": 0.9777,
+        "contact_customer_service": 0.8802,
+        "contact_human_agent": 0.9662,
+        "create_account": 0.9646,
+        "delete_account": 0.9882,
+        "delivery_options": 0.9756,
+        "delivery_period": 0.7039,
+        "edit_account": 0.972,
+        "get_invoice": 0.964,
+        "get_refund": 0.9398,
+        "newsletter_subscription": 1.0,
+        "payment_issue": 0.972,
+        "place_order": 0.9565,
+        "recover_password": 0.9923,
+        "registration_problems": 0.9802,
+        "review": 0.9872,
+        "set_up_shipping_address": 0.9412,
+        "switch_account": 0.9137,
+        "track_order": 0.7692,
+        "track_refund": 0.9433
+      }
+    },
+    {
+      "model_key": "google-gemini-3-flash",
+      "model": "google/gemini-3-flash-preview",
+      "tier": "flagship",
+      "label": "Gemini 3 Flash",
+      "price_key": "gemini-3-flash",
+      "n_scored": 4761,
+      "n_preds": 4761,
+      "transport_errors": 0,
+      "macro_f1": 0.9363981256033369,
+      "accuracy": 0.9367779878176854,
+      "invalid": 0,
+      "invalid_rate": 0.0,
+      "worst_classes": [
+        [
+          0.8175,
+          "switch_account"
+        ],
+        [
+          0.8204,
+          "delivery_period"
+        ],
+        [
+          0.8333,
+          "track_order"
+        ],
+        [
+          0.8607,
+          "edit_account"
+        ],
+        [
+          0.8705,
+          "contact_customer_service"
+        ]
+      ],
+      "mean_input_tokens": 689.0,
+      "mean_output_tokens": 13.5,
+      "total_reasoning_tokens": 0,
+      "cost_per_1k_tickets_list": 0.38513,
+      "spend_list_usd": 1.8336,
+      "spend_openrouter_usd": 1.8336,
+      "per_class_f1": {
+        "cancel_order": 0.9881,
+        "change_order": 1.0,
+        "change_shipping_address": 0.9458,
+        "check_cancellation_fee": 0.9811,
+        "check_invoice": 0.8961,
+        "check_payment_methods": 0.9975,
+        "check_refund_policy": 0.944,
+        "complaint": 0.9375,
+        "contact_customer_service": 0.8705,
+        "contact_human_agent": 0.9252,
+        "create_account": 0.9711,
+        "delete_account": 0.9882,
+        "delivery_options": 0.9798,
+        "delivery_period": 0.8204,
+        "edit_account": 0.8607,
+        "get_invoice": 0.9186,
+        "get_refund": 0.8929,
+        "newsletter_subscription": 1.0,
+        "payment_issue": 0.9716,
+        "place_order": 0.9773,
+        "recover_password": 0.9819,
+        "registration_problems": 0.9659,
+        "review": 0.9272,
+        "set_up_shipping_address": 0.9268,
+        "switch_account": 0.8175,
+        "track_order": 0.8333,
+        "track_refund": 0.9638
+      }
+    },
+    {
+      "model_key": "openai-gpt-5.6-luna",
+      "model": "openai/gpt-5.6-luna",
+      "tier": "efficient",
+      "label": "GPT-5.6 Luna",
+      "price_key": "gpt-5.6-luna",
+      "n_scored": 4761,
+      "n_preds": 4761,
+      "transport_errors": 0,
+      "macro_f1": 0.9360121307288417,
+      "accuracy": 0.936147868094938,
+      "invalid": 0,
+      "invalid_rate": 0.0,
+      "worst_classes": [
+        [
+          0.6992,
+          "track_order"
+        ],
+        [
+          0.7959,
+          "contact_customer_service"
+        ],
+        [
+          0.8348,
+          "delivery_period"
+        ],
+        [
+          0.875,
+          "set_up_shipping_address"
+        ],
+        [
+          0.904,
+          "contact_human_agent"
+        ]
+      ],
+      "mean_input_tokens": 622.7,
+      "mean_output_tokens": 13.5,
+      "total_reasoning_tokens": 0,
+      "cost_per_1k_tickets_list": 0.35189,
+      "spend_list_usd": 1.6753,
+      "spend_openrouter_usd": 0.3363,
+      "per_class_f1": {
+        "cancel_order": 0.9318,
+        "change_order": 0.997,
+        "change_shipping_address": 0.9476,
+        "check_cancellation_fee": 0.9866,
+        "check_invoice": 0.9807,
+        "check_payment_methods": 0.9975,
+        "check_refund_policy": 0.971,
+        "complaint": 0.9239,
+        "contact_customer_service": 0.7959,
+        "contact_human_agent": 0.904,
+        "create_account": 0.9711,
+        "delete_account": 0.9636,
+        "delivery_options": 0.9756,
+        "delivery_period": 0.8348,
+        "edit_account": 0.9686,
+        "get_invoice": 0.9858,
+        "get_refund": 0.958,
+        "newsletter_subscription": 1.0,
+        "payment_issue": 0.9899,
+        "place_order": 0.9263,
+        "recover_password": 0.9923,
+        "registration_problems": 0.9206,
+        "review": 0.9393,
+        "set_up_shipping_address": 0.875,
+        "switch_account": 0.913,
+        "track_order": 0.6992,
+        "track_refund": 0.9231
+      }
+    },
+    {
+      "model_key": "deepseek-v3.2",
+      "model": "deepseek/deepseek-v3.2",
+      "tier": "efficient",
+      "label": "DeepSeek 3.2",
+      "price_key": "deepseek-v3.2",
+      "n_scored": 4761,
+      "n_preds": 4761,
+      "transport_errors": 0,
+      "macro_f1": 0.9323700810964292,
+      "accuracy": 0.9338374291115312,
+      "invalid": 0,
+      "invalid_rate": 0.0,
+      "worst_classes": [
+        [
+          0.7914,
+          "delivery_period"
+        ],
+        [
+          0.8152,
+          "track_order"
+        ],
+        [
+          0.8201,
+          "edit_account"
+        ],
+        [
+          0.8617,
+          "contact_customer_service"
+        ],
+        [
+          0.8689,
+          "switch_account"
+        ]
+      ],
+      "mean_input_tokens": 675.9,
+      "mean_output_tokens": 9.1,
+      "total_reasoning_tokens": 0,
+      "cost_per_1k_tickets_list": 0.18613,
+      "spend_list_usd": 0.8861,
+      "spend_openrouter_usd": 0.3246,
+      "per_class_f1": {
+        "cancel_order": 0.9266,
+        "change_order": 0.988,
+        "change_shipping_address": 0.8883,
+        "check_cancellation_fee": 0.984,
+        "check_invoice": 0.9704,
+        "check_payment_methods": 0.995,
+        "check_refund_policy": 0.9396,
+        "complaint": 0.9156,
+        "contact_customer_service": 0.8617,
+        "contact_human_agent": 0.961,
+        "create_account": 0.9646,
+        "delete_account": 0.9509,
+        "delivery_options": 0.9756,
+        "delivery_period": 0.7914,
+        "edit_account": 0.8201,
+        "get_invoice": 0.9739,
+        "get_refund": 0.9266,
+        "newsletter_subscription": 1.0,
+        "payment_issue": 0.9899,
+        "place_order": 0.9361,
+        "recover_password": 0.9845,
+        "registration_problems": 0.9659,
+        "review": 0.9476,
+        "set_up_shipping_address": 0.9524,
+        "switch_account": 0.8689,
+        "track_order": 0.8152,
+        "track_refund": 0.8803
+      }
+    },
+    {
+      "model_key": "anthropic-haiku-4.5",
+      "model": "anthropic/claude-haiku-4.5",
+      "tier": "efficient",
+      "label": "Haiku 4.5",
+      "price_key": "haiku-4.5",
+      "n_scored": 4761,
+      "n_preds": 4761,
+      "transport_errors": 0,
+      "macro_f1": 0.8787583167959083,
+      "accuracy": 0.8651543793320731,
+      "invalid": 0,
+      "invalid_rate": 0.0,
+      "worst_classes": [
+        [
+          0.5447,
+          "contact_customer_service"
+        ],
+        [
+          0.6766,
+          "complaint"
+        ],
+        [
+          0.7664,
+          "review"
+        ],
+        [
+          0.773,
+          "set_up_shipping_address"
+        ],
+        [
+          0.8103,
+          "registration_problems"
+        ]
+      ],
+      "mean_input_tokens": 718.2,
+      "mean_output_tokens": 16.8,
+      "total_reasoning_tokens": 0,
+      "cost_per_1k_tickets_list": 0.80196,
+      "spend_list_usd": 3.8182,
+      "spend_openrouter_usd": 3.8182,
+      "per_class_f1": {
+        "cancel_order": 0.9565,
+        "change_order": 0.9787,
+        "change_shipping_address": 0.8714,
+        "check_cancellation_fee": 0.9757,
+        "check_invoice": 0.8961,
+        "check_payment_methods": 1.0,
+        "check_refund_policy": 0.9266,
+        "complaint": 0.6766,
+        "contact_customer_service": 0.5447,
+        "contact_human_agent": 0.8895,
+        "create_account": 0.9474,
+        "delete_account": 0.9544,
+        "delivery_options": 0.9672,
+        "delivery_period": 0.8513,
+        "edit_account": 0.8997,
+        "get_invoice": 0.9153,
+        "get_refund": 0.8153,
+        "newsletter_subscription": 0.9949,
+        "payment_issue": 0.8932,
+        "place_order": 0.8757,
+        "recover_password": 0.9632,
+        "registration_problems": 0.8103,
+        "review": 0.7664,
+        "set_up_shipping_address": 0.773,
+        "switch_account": 0.8203,
+        "track_order": 0.8547,
+        "track_refund": 0.9085
+      }
+    }
+  ]
+}

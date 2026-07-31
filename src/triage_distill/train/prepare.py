@@ -74,6 +74,7 @@ def main() -> None:
     c = cfg(args.dataset)
     TARGETS = c.label_dir / "targets"
     VAL = c.splits_dir / "val.parquet"
+    TEST = c.splits_dir / "test.parquet"
     OUT_DIR = c.train_dir
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     counts = {}
@@ -96,11 +97,22 @@ def main() -> None:
     _write(OUT_DIR / "ablation.messages.jsonl", ab_rows)
     counts["ablation"] = len(ab_rows)
 
-    # Val eval set — ticket + gold only (the student must produce the category itself).
-    val = pd.read_parquet(VAL).reset_index(drop=True)
-    val_rows = [{"id": i, "text": t, "gold": g} for i, (t, g) in enumerate(zip(val["text"], val["label"]))]
+    # Eval gold sets — ticket + gold only (the model must produce the category itself).
+    # `id` = 0-based row index of the reset parquet — the ONLY id convention in the repo,
+    # so student preds (4090) and frontier-panel preds (eval.panel) align by identical ids.
+    def _gold(parquet: Path) -> list[dict]:
+        df = pd.read_parquet(parquet).reset_index(drop=True)
+        return [{"id": i, "text": t, "gold": g} for i, (t, g) in enumerate(zip(df["text"], df["label"]))]
+
+    val_rows = _gold(VAL)
     _write(OUT_DIR / "val_eval.jsonl", val_rows)
     counts["val_eval"] = len(val_rows)
+
+    # Test is SACRED — scored exactly once (M3): student on the 4090 + the frontier panel,
+    # both against this same file, so every model is graded on identical ids/gold.
+    test_rows = _gold(TEST)
+    _write(OUT_DIR / "test_eval.jsonl", test_rows)
+    counts["test_eval"] = len(test_rows)
 
     print(json.dumps(counts, indent=2))
     print(f"-> {OUT_DIR.relative_to(REPO_ROOT)}/ (*.messages.jsonl for training + val_eval.jsonl for scoring)")
