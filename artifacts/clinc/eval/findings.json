@@ -1,6 +1,6 @@
 {
   "dataset": "clinc",
-  "git_commit": "1905356",
+  "git_commit": "d2446f5",
   "runs": {
     "clinc_ablation_s42": {
       "mode": "classify",
@@ -398,12 +398,220 @@
           "oos"
         ]
       ]
+    },
+    "clinc_ablation_s1337": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 2.0,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9604,
+          "val_accuracy": 0.9584,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9604,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0533,
+          "train_loss_last": 0.0001
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6667,
+          "reminder"
+        ],
+        [
+          0.7368,
+          "restaurant_reservation"
+        ],
+        [
+          0.75,
+          "oos"
+        ],
+        [
+          0.8205,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_a_s1337": {
+      "mode": "classify",
+      "n_train_examples": 11408,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 7.3,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9546,
+          "val_accuracy": 0.9539,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9546,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.317,
+          "train_loss_last": 0.1563
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6415,
+          "reminder"
+        ],
+        [
+          0.7619,
+          "restaurant_reservation"
+        ],
+        [
+          0.7647,
+          "accept_reservations"
+        ],
+        [
+          0.8023,
+          "oos"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s1337": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 4.3,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9305,
+          "val_accuracy": 0.9235,
+          "invalid": 7
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9305,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3845,
+          "train_loss_last": 0.1907
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0952,
+          "reminder_update"
+        ],
+        [
+          0.4314,
+          "reminder"
+        ],
+        [
+          0.438,
+          "oos"
+        ],
+        [
+          0.5714,
+          "accept_reservations"
+        ],
+        [
+          0.6939,
+          "restaurant_reservation"
+        ]
+      ]
     }
   },
   "seed_variance": {
     "seeds": [
-      42
+      42,
+      1337
     ],
-    "n_seeds": 1
+    "n_seeds": 2
   }
 }
