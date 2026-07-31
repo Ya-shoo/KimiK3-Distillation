@@ -978,5 +978,76 @@
         }
       }
     }
+  },
+  "test_eval": {
+    "date": "2026-07-31",
+    "git_commit": "9d714ea",
+    "protocol": "Held-out test split, never used for training, tuning, or checkpoint selection. One scored pass per recipe: the s42 checkpoint at its best-VAL epoch, deterministic decode (do_sample=False, schema-constrained), scored exactly once. No selection on test.",
+    "teacher": {
+      "model": "kimi-k3",
+      "test_macro_f1": 0.9078,
+      "test_accuracy": 0.9073,
+      "source": "artifacts/clinc/eval/panel/kimi-k3-teacher.json"
+    },
+    "retention_target": 0.975,
+    "recipes": {
+      "ablation": {
+        "checkpoint": "s42 epoch 3 (best-val)",
+        "test_macro_f1": 0.922,
+        "test_accuracy": 0.8985,
+        "invalid": 0,
+        "retention_vs_teacher": 1.0157,
+        "val_macro_f1_seed_mean": 0.9611,
+        "val_to_test_delta": -0.0391,
+        "clears_0975_gate": true,
+        "oos": {
+          "recall": 0.624,
+          "precision": 0.9781,
+          "n_gold": 1000,
+          "n_pred": 638
+        }
+      },
+      "recipe_a": {
+        "checkpoint": "s42 epoch 3 (best-val)",
+        "test_macro_f1": 0.9103,
+        "test_accuracy": 0.8853,
+        "invalid": 0,
+        "retention_vs_teacher": 1.0027,
+        "val_macro_f1_seed_mean": 0.9563,
+        "val_to_test_delta": -0.046,
+        "clears_0975_gate": true,
+        "oos": {
+          "recall": 0.593,
+          "precision": 0.9737,
+          "n_gold": 1000,
+          "n_pred": 609
+        }
+      },
+      "recipe_b": {
+        "checkpoint": "s42 epoch 3 (best-val)",
+        "test_macro_f1": 0.8724,
+        "test_accuracy": 0.8115,
+        "invalid": 71,
+        "retention_vs_teacher": 0.961,
+        "val_macro_f1_seed_mean": 0.9317,
+        "val_to_test_delta": -0.0593,
+        "clears_0975_gate": false,
+        "oos": {
+          "recall": 0.264,
+          "precision": 0.967,
+          "n_gold": 1000,
+          "n_pred": 273
+        }
+      }
+    },
+    "findings": [
+      "ablation (101.5% retention) and recipe_a (100.3%) both beat the teacher and clear the gate. The bitext<->clinc mirror replicates on test: ablation > recipe_a at 151 classes, recipe_a > ablation at 27.",
+      "recipe_b FAILS the 97.5% retention gate: 0.8724 = 96.1% of K3. Only failing pass of six. Its val->test drop (-5.9pt) is ~1.5x the classify recipes' (-3.9/-4.6pt).",
+      "The oos collapse deepens on test: recall 0.264 (precision 0.967) vs 0.297 val seed-mean, and test is 18.2% oos (1000/5500) vs 3.2% on val (100/3100) - composition amplifies the weakness, dragging accuracy to 0.8115 while macro-F1 (oos = 1 of 151 classes) hides it.",
+      "Classify recipes' val->test gap is oos-driven too: ablation oos recall 0.687 (val mean) -> 0.624 (test); the in-scope classes hold up.",
+      "reminder_update F1 = 0.0 for recipe_b on test - the chronic dead class from val persists; fun_fact (0.518) and distance (0.560) join the sub-0.6 tail.",
+      "recipe_b invalid = 71/5500 (1.3%) despite 882 constrained retries (16% of rows needed the retry path). Provenance: an lm-format-enforcer MemoryError (system RAM, token-cache growth after ~6h of passes in one process) fired near retry row 870; LMFE falls back to unconstrained decode for the affected batch, so at most ~4 of the 71 invalids trace to it. All invalids counted wrong by the scorer as designed.",
+      "Inference cost asymmetry on test: recipe_b took 125.6 min for 5500 rows (0.7 tickets/s, two-phase decode + retries) vs ~6.5 min for each classify pass (~14 tickets/s) - a ~20x runtime premium for the recipe that also scores worst here."
+    ]
   }
 }

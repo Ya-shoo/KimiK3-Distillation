@@ -860,12 +860,61 @@
     }
   ],
   "caveats": [
-    "Recipe A's training file interleaves a classify row and an explain row per ticket (5,722 rows vs 2,861), so at equal 'epochs' A got ~2x the optimizer steps of B/ablation (179 vs 90 steps/epoch). A's win may partly be optimizer budget, not multi-task signal alone \u2014 owner to interpret; an ablation-at-6-epochs or step-matched control would separate the two.",
+    "Recipe A's training file interleaves a classify row and an explain row per ticket (5,722 rows vs 2,861), so at equal 'epochs' A got ~2x the optimizer steps of B/ablation (179 vs 90 steps/epoch). A's win may partly be optimizer budget, not multi-task signal alone — owner to interpret; an ablation-at-6-epochs or step-matched control would separate the two.",
     "Bitext recipe_a's original run trained under the unintended stage-sawtooth LR schedule (see changelog) with annealed-checkpoint selection asymmetry - both suspected of flattering its 0.9886. RESOLVED 2026-07-30: the fixed-schedule re-run (bitext_recipe_a_s42v2) scored HIGHER (0.9920 @2; seeds 0.9920/0.9916/0.9908, sigma 0.0006), refuting the inflation hypothesis - the sawtooth if anything suppressed recipe A. The legacy sawtooth run is kept as recipe_a_sawtooth_legacy for the record; all seed statistics use fixed-schedule runs only. Note the re-run used the bs16xga2 memory layout (same effective batch 32) - see the batch-layout changelog entry.",
     "Batch memory layout: runs up to 2026-07-30 ~01:00 used per-device batch 32 x grad-accum 1; later runs (incl. all extra seeds + bitext_recipe_a_s42v2) used 16x2 after a Windows WDDM VRAM livelock made bs32 unreliable. Effective batch, optimizer step count, and LR schedule are identical; only gradient-reduction order differs (fp-noise level). Recorded per run in run_config_*.json.",
     "delivery_period <-> track_order is the known Bitext label-noise pair (see M1 gold-gate audit): it is the floor on ablation and recipe B per-class F1 at every epoch, while recipe A largely resolved it by epoch 2.",
     "Constrained JSON decoding produced zero invalid outputs across all runs and epochs, so invalid-rate differences play no role in the comparison.",
     "Single seed (42) so far - seed-variance error bars (PAPER-OUTLINE Part B) still owed; val macro-F1 deltas between recipes (A +0.86pt over ablation, B -0.44pt under it at best epochs) are not yet distinguishable from seed noise.",
     "Train-vs-val gap is reported as per-epoch train LOSS alongside val macro-F1 (train macro-F1 was not scored). The signal: A/B train loss kept falling epoch 2->3 while val macro-F1 dipped slightly, and the ablation's train loss was already ~0 by mid-epoch 2 (label-only targets are a few tokens - it memorizes the train set) -> mild overfitting past epoch 2, consistent with best_epoch=2 everywhere."
-  ]
+  ],
+  "test_eval": {
+    "date": "2026-07-31",
+    "git_commit": "9d714ea",
+    "protocol": "Held-out test split, never used for training, tuning, or checkpoint selection. One scored pass per recipe: the s42 checkpoint at its best-VAL epoch, deterministic decode (do_sample=False, schema-constrained), scored exactly once. No selection on test.",
+    "teacher": {
+      "model": "kimi-k3",
+      "test_macro_f1": 0.9498,
+      "test_accuracy": 0.9502,
+      "source": "artifacts/bitext/eval/panel/kimi-k3-teacher.json"
+    },
+    "retention_target": 0.975,
+    "recipes": {
+      "ablation": {
+        "checkpoint": "s42 epoch 2 (best-val)",
+        "test_macro_f1": 0.9848,
+        "test_accuracy": 0.9851,
+        "invalid": 0,
+        "retention_vs_teacher": 1.0368,
+        "val_macro_f1_seed_mean": 0.9788,
+        "val_to_test_delta": 0.006,
+        "clears_0975_gate": true
+      },
+      "recipe_a": {
+        "checkpoint": "s42 epoch 2 (best-val)",
+        "test_macro_f1": 0.9923,
+        "test_accuracy": 0.9926,
+        "invalid": 0,
+        "retention_vs_teacher": 1.0448,
+        "val_macro_f1_seed_mean": 0.9915,
+        "val_to_test_delta": 0.0008,
+        "clears_0975_gate": true
+      },
+      "recipe_b": {
+        "checkpoint": "s42 epoch 2 (best-val)",
+        "test_macro_f1": 0.9801,
+        "test_accuracy": 0.9809,
+        "invalid": 2,
+        "retention_vs_teacher": 1.0319,
+        "val_macro_f1_seed_mean": 0.9779,
+        "val_to_test_delta": 0.0022,
+        "clears_0975_gate": true
+      }
+    },
+    "findings": [
+      "All three recipes clear the 97.5% retention gate AND exceed the teacher outright: retention 103.2-104.5% of K3's 0.9498. 'Retention' is a floor, not a ceiling, on this benchmark.",
+      "Recipe ordering replicates on test with no val->test generalization gap: recipe_a > ablation > recipe_b, and every recipe scores slightly ABOVE its val seed-mean (deltas +0.1 to +0.6pt) - val was not flattering the models.",
+      "Invalid outputs: 0 for both classify recipes, 2/4761 for recipe_b's free-form pass (token-budget truncations; counted wrong by the scorer as designed)."
+    ]
+  }
 }
