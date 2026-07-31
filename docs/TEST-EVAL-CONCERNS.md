@@ -44,16 +44,19 @@ are 5-15x the val σ, so the conclusions look safe, but the paper should say "te
 is a single seed; σ quoted from val" once, plainly, rather than imply test error
 bars exist.
 
-## 4. Did the LMFE MemoryError contaminate more than one batch? [post-hoc]
+## 4. Did the LMFE MemoryError contaminate more than one batch? [RESOLVED 2026-07-31]
 
-The findings note caps the damage at ~4 rows ("LMFE falls back to unconstrained
-for the affected batch"). I have not verified that. The MemoryError hit the
-token-cache *extend* path near retry row ~870; if the cache object was left
-corrupted, subsequent batches could also have decoded effectively unconstrained.
-Cheap check from `test_recipe_b_preds.jsonl` alone: group the 882
-`constrained_retry` rows by position, and compare invalid-rate before vs after
-row ~870. If invalids cluster in the tail, the note's "~4 of 71" attribution is
-wrong and should be corrected. ~10 lines of Python, zero model involvement.
+Verified from `test_recipe_b_preds.jsonl` (no model involvement): all 71
+invalids are `constrained_retry` rows (clean-pass rows: 0 invalid), and they are
+spread uniformly across the retry sequence — 67 occurred *before* the
+MemoryError near retry row ~868 (7.7% base rate), 4/14 after. No cache
+contamination; the "at most ~4" attribution in findings.json holds.
+
+The sharper finding this surfaced: the constrained retry path has an intrinsic
+~7.7% invalid rate with LMFE fully functional — the 512-token decode budget
+truncates mid-JSON even when every emitted token is schema-legal. The budget,
+not the MemoryError, is the mechanism behind the 71 invalids. This feeds
+directly into item 5's knowledge-vs-format decomposition.
 
 ## 5. Decompose recipe_b's CLINC failure: knowledge vs format. [post-hoc]
 
