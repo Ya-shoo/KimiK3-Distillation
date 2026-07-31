@@ -1,6 +1,6 @@
 {
   "dataset": "clinc",
-  "git_commit": "d2446f5",
+  "git_commit": "d8d3eac",
   "runs": {
     "clinc_ablation_s42": {
       "mode": "classify",
@@ -605,13 +605,287 @@
           "restaurant_reservation"
         ]
       ]
+    },
+    "clinc_ablation_s2024": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 2.0,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9609,
+          "val_accuracy": 0.9594,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9609,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0533,
+          "train_loss_last": 0.0001
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7753,
+          "oos"
+        ],
+        [
+          0.7895,
+          "restaurant_reservation"
+        ],
+        [
+          0.85,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_a_s2024": {
+      "mode": "classify",
+      "n_train_examples": 11408,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 7.2,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.957,
+          "val_accuracy": 0.9565,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.957,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3178,
+          "train_loss_last": 0.1569
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6415,
+          "reminder"
+        ],
+        [
+          0.8182,
+          "oos"
+        ],
+        [
+          0.8293,
+          "restaurant_reservation"
+        ],
+        [
+          0.8333,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s2024": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 4.5,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.933,
+          "val_accuracy": 0.9258,
+          "invalid": 9
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.933,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3841,
+          "train_loss_last": 0.1911
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4,
+          "oos"
+        ],
+        [
+          0.4528,
+          "reminder"
+        ],
+        [
+          0.4667,
+          "accept_reservations"
+        ],
+        [
+          0.6939,
+          "restaurant_reservation"
+        ]
+      ]
     }
   },
   "seed_variance": {
     "seeds": [
       42,
-      1337
+      1337,
+      2024
     ],
-    "n_seeds": 2
+    "n_seeds": 3,
+    "families": {
+      "recipe_a": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9563,
+        "macro_f1_sigma": 0.0015,
+        "per_run": {
+          "clinc_recipe_a_s42": 0.9574,
+          "clinc_recipe_a_s1337": 0.9546,
+          "clinc_recipe_a_s2024": 0.957
+        },
+        "oos_recall_mean": 0.7167,
+        "oos_recall_per_run": {
+          "clinc_recipe_a_s42": 0.72,
+          "clinc_recipe_a_s1337": 0.71,
+          "clinc_recipe_a_s2024": 0.72
+        }
+      },
+      "ablation": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9611,
+        "macro_f1_sigma": 0.0008,
+        "per_run": {
+          "clinc_ablation_s42": 0.9619,
+          "clinc_ablation_s1337": 0.9604,
+          "clinc_ablation_s2024": 0.9609
+        },
+        "oos_recall_mean": 0.6867,
+        "oos_recall_per_run": {
+          "clinc_ablation_s42": 0.71,
+          "clinc_ablation_s1337": 0.66,
+          "clinc_ablation_s2024": 0.69
+        }
+      },
+      "recipe_b": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9317,
+        "macro_f1_sigma": 0.0013,
+        "per_run": {
+          "clinc_recipe_b_s42": 0.9316,
+          "clinc_recipe_b_s1337": 0.9305,
+          "clinc_recipe_b_s2024": 0.933
+        },
+        "oos_recall_mean": 0.2967,
+        "oos_recall_per_run": {
+          "clinc_recipe_b_s42": 0.33,
+          "clinc_recipe_b_s1337": 0.3,
+          "clinc_recipe_b_s2024": 0.26
+        }
+      },
+      "ablation_ctrl6": {
+        "epoch": 3,
+        "n": 1,
+        "macro_f1_mean": 0.9624,
+        "macro_f1_sigma": null,
+        "per_run": {
+          "clinc_ablation_ctrl6_s42": 0.9624
+        },
+        "oos_recall_mean": 0.72,
+        "oos_recall_per_run": {
+          "clinc_ablation_ctrl6_s42": 0.72
+        }
+      }
+    }
   }
 }
