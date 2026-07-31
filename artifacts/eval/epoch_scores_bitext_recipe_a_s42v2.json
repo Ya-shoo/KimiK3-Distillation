@@ -1,0 +1,97 @@
+{
+  "run": "bitext_recipe_a_s42v2",
+  "mode": "classify",
+  "gold": "data\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": null,
+  "best_epoch": 2,
+  "epochs": [
+    {
+      "epoch": 1,
+      "checkpoint": "checkpoint-179",
+      "macro_f1": 0.9884720992547297,
+      "accuracy": 0.9890802183956321,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9412,
+          "get_refund"
+        ],
+        [
+          0.9615,
+          "create_account"
+        ],
+        [
+          0.9703,
+          "registration_problems"
+        ],
+        [
+          0.9794,
+          "set_up_shipping_address"
+        ]
+      ]
+    },
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-358",
+      "macro_f1": 0.9920002791700627,
+      "accuracy": 0.9928601427971441,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.9291,
+          "track_refund"
+        ],
+        [
+          0.9474,
+          "get_refund"
+        ],
+        [
+          0.9814,
+          "create_account"
+        ],
+        [
+          0.9839,
+          "delivery_options"
+        ],
+        [
+          0.9848,
+          "registration_problems"
+        ]
+      ]
+    },
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-537",
+      "macro_f1": 0.990888745783021,
+      "accuracy": 0.9916001679966401,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9418,
+          "get_refund"
+        ],
+        [
+          0.9686,
+          "create_account"
+        ],
+        [
+          0.9749,
+          "registration_problems"
+        ],
+        [
+          0.9798,
+          "place_order"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "run": "bitext_ablation_s2024",
+  "mode": "classify",
+  "gold": "data\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": 2,
+  "best_epoch": 2,
+  "epochs": [
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-180",
+      "macro_f1": 0.9791207276491084,
+      "accuracy": 0.9798404031919362,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.7853,
+          "delivery_period"
+        ],
+        [
+          0.8108,
+          "track_order"
+        ],
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9468,
+          "get_refund"
+        ],
+        [
+          0.9877,
+          "create_account"
+        ]
+      ]
+    }
+  ]
+}
