@@ -161,8 +161,10 @@ def money_chart(benchmarks, hero, *, title, subtitle="",
                 dark=False, note=None, ncols=2, out=None):
     """The hero image: cost (log x) vs macro-F1 (y), one panel per benchmark, hero highlighted.
 
-    benchmarks: {name: [(model, cost_per_1k, macro_f1), ...]}. The student sits high-and-left
-    (accurate + ~free); flagships high-and-right (accurate + expensive); efficient tier between.
+    benchmarks: {name: [(model, cost_per_1k, macro_f1[, label_dy]), ...]} — the optional
+    4th element nudges that row's label vertically (in points) to dodge collisions.
+    The student sits high-and-left (accurate + ~free); flagships high-and-right
+    (accurate + expensive); efficient tier between.
     """
     p = _p(dark); _apply_rc(dark)
     items = list(benchmarks.items())
@@ -171,13 +173,14 @@ def money_chart(benchmarks, hero, *, title, subtitle="",
     axes = list(axes.flatten()) if hasattr(axes, "flatten") else [axes]
 
     for ax, (bname, rows) in zip(axes, items):
-        costs = [c for _, c, _ in rows]
-        f1s = [f for _, _, f in rows]
-        for model, cost, f1 in rows:
+        rows = [(r + (0,))[:4] for r in rows]
+        costs = [c for _, c, _, _ in rows]
+        f1s = [f for _, _, f, _ in rows]
+        for model, cost, f1, dy in rows:
             h = model == hero
             ax.scatter([cost], [f1], s=170 if h else 70, zorder=5 if h else 3,
                        color=p["accent"] if h else p["bar"], edgecolor=p["surface"], linewidth=1.5)
-            ax.annotate(model, (cost, f1), xytext=(9, 0), textcoords="offset points",
+            ax.annotate(model, (cost, f1), xytext=(9, dy), textcoords="offset points",
                         va="center", ha="left", fontsize=8.5,
                         color=p["accent"] if h else p["ink2"], fontweight="bold" if h else "normal")
         ax.set_xscale("log")
@@ -197,7 +200,7 @@ def money_chart(benchmarks, hero, *, title, subtitle="",
     for ax in axes[len(items):]:
         ax.set_visible(False)
     fig.subplots_adjust(top=0.80, wspace=0.26, bottom=0.13)
-    _titles(fig, title, subtitle, note, p, title_y=0.965, sub_y=0.895)
+    _titles(fig, title, subtitle, note, p, title_y=0.995, sub_y=0.9)
     return _save(fig, out)
 
 

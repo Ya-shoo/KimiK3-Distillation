@@ -473,3 +473,6 @@ git commit, seed, knobs: `artifacts/*/eval/run_config_*.json`. Environment lock:
 `artifacts/*/eval/findings.json` (+ `test_eval` blocks). Panel raw scores:
 `artifacts/*/eval/panel/`. Test predictions for independent rescoring:
 `artifacts/*/eval/test_*_preds.jsonl` against `data/*/train/test_eval.jsonl`.
+Rendered figures (money chart, leaderboard, recipe bars, learning curves,
+savings-at-scale; light + dark, SVG + PNG): `artifacts/charts/`, regenerable via
+`uv run python -m triage_distill.eval.render_charts`.
