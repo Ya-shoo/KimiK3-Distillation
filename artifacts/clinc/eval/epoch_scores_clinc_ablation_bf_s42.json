@@ -1,0 +1,115 @@
+{
+  "run": "clinc_ablation_bf_s42",
+  "mode": "classify",
+  "gold": "data\\clinc\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": null,
+  "best_epoch": 3,
+  "epochs": [
+    {
+      "epoch": 1,
+      "checkpoint": "checkpoint-189",
+      "macro_f1": 0.9565249311084675,
+      "accuracy": 0.9529032258064516,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.6667,
+          "what_are_your_hobbies"
+        ],
+        [
+          0.7692,
+          "shopping_list_update"
+        ],
+        [
+          0.7811,
+          "oos"
+        ],
+        [
+          0.8,
+          "what_song"
+        ],
+        [
+          0.8235,
+          "transactions"
+        ]
+      ],
+      "oos": {
+        "recall": 0.66,
+        "precision": 0.9565,
+        "n_gold": 100,
+        "n_pred": 69
+      }
+    },
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-378",
+      "macro_f1": 0.9579723168611269,
+      "accuracy": 0.9548387096774194,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.4,
+          "who_made_you"
+        ],
+        [
+          0.6207,
+          "reminder"
+        ],
+        [
+          0.6316,
+          "reminder_update"
+        ],
+        [
+          0.7143,
+          "who_do_you_work_for"
+        ],
+        [
+          0.7394,
+          "oos"
+        ]
+      ],
+      "oos": {
+        "recall": 0.61,
+        "precision": 0.9385,
+        "n_gold": 100,
+        "n_pred": 65
+      }
+    },
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-567",
+      "macro_f1": 0.9714503073924937,
+      "accuracy": 0.967741935483871,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.7953,
+          "oos"
+        ],
+        [
+          0.8235,
+          "restaurant_reservation"
+        ],
+        [
+          0.878,
+          "todo_list"
+        ],
+        [
+          0.8889,
+          "bill_due"
+        ],
+        [
+          0.8889,
+          "change_accent"
+        ]
+      ],
+      "oos": {
+        "recall": 0.68,
+        "precision": 0.9577,
+        "n_gold": 100,
+        "n_pred": 71
+      }
+    }
+  ]
+}
