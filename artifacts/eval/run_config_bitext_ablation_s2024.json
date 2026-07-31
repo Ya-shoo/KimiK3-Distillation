@@ -1,0 +1,33 @@
+{
+  "name": "bitext_ablation_s2024",
+  "base": "Qwen/Qwen3-4B",
+  "data": "data\\train\\ablation.messages.jsonl",
+  "n_examples": 2861,
+  "knobs": {
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "learning_rate": 0.0002,
+    "epochs": 3.0,
+    "per_device_batch": 16,
+    "grad_accum": 2,
+    "max_seq_len": 256,
+    "completion_only_loss": true,
+    "warmup_ratio": 0.03,
+    "lr_scheduler": "linear",
+    "weight_decay": 0.01,
+    "lora_dropout": 0.0,
+    "seed": 2024
+  },
+  "git_commit": "ccfcb84",
+  "train_minutes": 1.0,
+  "final_loss": 1.113716522619749e-05
+}

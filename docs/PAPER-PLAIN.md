@@ -1,19 +1,22 @@
 # What We Built and What We Found — the plain-English version
 
-> **DRAFT v1** (2026-07-30). Companion to [`PAPER.md`](PAPER.md); assumes you've met
-> the ideas in [`PRIMER.md`](PRIMER.md) (teacher/student, LoRA, ablation, macro-F1).
-> ⟦Numbers still being measured are marked like this.⟧
+> **DRAFT v2** (2026-07-30, all training runs complete — 3 random seeds per
+> variant on both benchmarks). Companion to [`PAPER.md`](PAPER.md); assumes you've
+> met the ideas in [`PRIMER.md`](PRIMER.md) (teacher/student, LoRA, ablation,
+> macro-F1). ⟦Only the frontier-model showdown numbers are still pending.⟧
 
 ## The one-paragraph version
 
 We taught a small, free-to-run AI model (Qwen3-4B) to sort customer messages into
-categories by learning from a giant frontier model (Kimi K3). It works: our student
-gets ~96–99% balanced accuracy on two very different benchmarks. But the trendy
-part of the method — also teaching the student the big model's *reasoning*, not
-just its answers — didn't hold up when we tested it fairly on real data. On the
-real benchmark, the plain version (answers only) beat both reasoning versions, and
-one reasoning version quietly broke the most business-critical behavior: knowing
-when to say *"this fits nothing — send it to a human."*
+categories by learning from a giant frontier model (Kimi K3). It works: our
+student gets ~96–99% balanced accuracy on two very different benchmarks. But the
+trendy part of the method — also teaching the student the big model's *reasoning*,
+not just its answers — turned out to be a coin with two faces: on the tidy
+synthetic benchmark it genuinely helps (a clear win, well beyond random
+variation), and on the real-people benchmark it genuinely *hurts* (a clear loss,
+also beyond random variation). And one reasoning variant quietly broke the most
+business-critical behavior everywhere: knowing when to say *"this fits nothing —
+send it to a human."*
 
 ## What we actually did
 
@@ -33,38 +36,48 @@ when to say *"this fits nothing — send it to a human."*
 4. **Graded on held-out questions after every epoch**, kept the test set locked
    away (it gets opened exactly once, later, when we grade the big models too).
 
-## The scoreboard (validation, one seed so far ⟦error bars coming⟧)
+## The scoreboard (validation; average over 3 random seeds, ± the seed wobble)
 
 | | Bitext (synthetic) | CLINC (real) | CLINC "escalate" catch rate |
 |---|---|---|---|
-| Answers-only (control) | 98.0% | **96.2%** | 71% |
-| Recipe A (two skills) | **98.9%** † | 95.7% | 72% |
-| Recipe B (think-then-answer) | 97.6% | 93.2% | **33%** |
+| Answers-only (control) | 97.9 ± 0.1% | **96.1 ± 0.1%** | 69% |
+| Recipe A (two skills) | **99.2 ± 0.1%** | 95.6 ± 0.2% | 72% |
+| Recipe B (think-then-answer) | 97.8 ± 0.2% | 93.2 ± 0.1% | **30%** |
 
-† Asterisk explained below — this number got an unfair boost.
+The wobble columns matter: every gap discussed below is many times larger than
+the ±, so none of this is luck-of-the-seed.
+
+For scale: the same small model *without* our training scores **31%** and **27%**
+on these benchmarks (and never says "escalate" at all). The teaching is the
+entire product.
 
 ## The three findings
 
-### 1. The reasoning recipe lost the rematch on real data
+### 1. The reasoning recipe is a mirror: real win on fake data, real loss on real data
 
-On the synthetic benchmark, Recipe A looked like the winner — exactly what the
-famous "Distilling Step-by-Step" result predicts. On the real benchmark it *lost*
-to the plain control. We double-checked the loss three ways: we gave the control
-the same total training compute as A (it still won); we fixed a scheduling bug
-(below); and we selected every version's best epoch the same way. ⟦Seed-variance
-runs will tell us if the gap is solid or wobble.⟧ The honest current read: on
-short, real queries, the answer is close to the surface — the reasoning detour
-doesn't add information the label doesn't already carry.
+On the synthetic benchmark, Recipe A wins big — +1.3 points, replicated across
+all three seeds, exactly what the famous "Distilling Step-by-Step" result
+predicts. On the real benchmark the *same recipe loses* — −0.5 points, also
+replicated across all three seeds, and still losing when we gave the control the
+same total training compute. Our best explanation: synthetic data is written from
+templates, and the teacher's explanations effectively teach the student the
+template grammar — free extra signal. Real human queries have no grammar to
+learn; the answer sits near the surface, and the reasoning detour spends the
+student's limited capacity without adding information. The uncomfortable
+implication for the field: method papers that evaluate reasoning-distillation on
+clean benchmark data may be measuring the benchmark, not the method.
 
 ### 2. Think-first training broke the escalate button
 
 Recipe B — the version that writes its reasoning *before* its answer — catches
-only ~33% of out-of-scope messages, versus ~71% for everyone else. Writing an
-explanation first commits the model to "evidence for some category…" — and the
-explanation format has no graceful way to say "none of the above." So the model
-talks itself into the nearest category instead of raising its hand. If your
-deployment depends on escalation (most support systems do), that's disqualifying,
-whatever the headline accuracy says.
+only ~30% of out-of-scope messages (consistent across every seed: 26–35%), versus
+~70% for everyone else. Writing an explanation first commits the model to
+"evidence for some category…" — and the explanation format has no graceful way to
+say "none of the above." So the model talks itself into the nearest category
+instead of raising its hand. The same rambling occasionally runs past the token
+budget before the answer ever appears — the only invalid outputs in the entire
+project, all from this recipe. If your deployment depends on escalation (most
+support systems do), that's disqualifying, whatever the headline accuracy says.
 
 ### 3. Our quality filter quietly deleted a whole category
 
@@ -76,24 +89,25 @@ filter meant to remove bad reasoning can also silently starve the student of
 whole categories. (Fix queued: for filtered-out categories, feed the official
 answers without the teacher's reasoning.)
 
-### Bonus finding: we caught our own experiment cheating
+### Bonus finding: we accused our own experiment of cheating — and it was innocent
 
-The synthetic-benchmark "win" for Recipe A (the †) got three hidden advantages,
-found in a post-run audit: a learning-rate bug gave it a schedule the others
-didn't get; its per-epoch snapshots were taken at a more flattering moment; and it
-received twice the training steps. All three are fixed or controlled in the real-
-benchmark runs — which is precisely where the win evaporated. ⟦A corrected
-synthetic-benchmark re-run is happening tonight.⟧ Moral: before believing a
-method's win, audit what *else* differed.
+A post-run audit found Recipe A's original synthetic-benchmark run had gotten
+three hidden advantages: a learning-rate bug gave it a schedule the others didn't
+get, its snapshots were taken at a more flattering moment, and it received twice
+the training steps. Suspicious, we re-ran it with everything corrected — and the
+score went *up* (99.2% vs the original 98.9%). The suspected inflation wasn't
+there; the bug had actually been holding it back. We report this because the
+process is the point: believing a result means trying to break it, and publishing
+the audit either way — the accusation, the test, and the acquittal.
 
 ## What's still coming
 
 - **The main event:** grading Kimi K3 itself and six other frontier/efficient
   models on the same locked test set, with real prices — the
   cost-vs-accuracy chart this project exists for. ⟦M3⟧
-- Error bars (3 random seeds per recipe), the corrected synthetic re-run, and a
-  test of whether reasoning at least lets the student learn from *fewer* examples
-  (its last remaining defense).
+- A test of whether reasoning at least lets the student learn from *fewer*
+  examples (its last remaining defense), and a fix for the deleted-category
+  problem from finding 3.
 
 ## Why this matters
 

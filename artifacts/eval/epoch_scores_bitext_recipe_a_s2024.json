@@ -1,0 +1,39 @@
+{
+  "run": "bitext_recipe_a_s2024",
+  "mode": "classify",
+  "gold": "data\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": 2,
+  "best_epoch": 2,
+  "epochs": [
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-358",
+      "macro_f1": 0.9907750692456365,
+      "accuracy": 0.9916001679966401,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9524,
+          "get_refund"
+        ],
+        [
+          0.975,
+          "create_account"
+        ],
+        [
+          0.9798,
+          "registration_problems"
+        ],
+        [
+          0.9839,
+          "delivery_options"
+        ]
+      ]
+    }
+  ]
+}

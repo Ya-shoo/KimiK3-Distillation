@@ -1,0 +1,33 @@
+{
+  "name": "clinc_ablation_bf_s42",
+  "base": "Qwen/Qwen3-4B",
+  "data": "data\\clinc\\train\\ablation_bf.messages.jsonl",
+  "n_examples": 6040,
+  "knobs": {
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "learning_rate": 0.0002,
+    "epochs": 3.0,
+    "per_device_batch": 16,
+    "grad_accum": 2,
+    "max_seq_len": 256,
+    "completion_only_loss": true,
+    "warmup_ratio": 0.03,
+    "lr_scheduler": "linear",
+    "weight_decay": 0.01,
+    "lora_dropout": 0.0,
+    "seed": 42
+  },
+  "git_commit": "59cad2b",
+  "train_minutes": 2.4,
+  "final_loss": 0.0005598064995333027
+}

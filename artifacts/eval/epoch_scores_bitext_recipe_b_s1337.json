@@ -1,0 +1,39 @@
+{
+  "run": "bitext_recipe_b_s1337",
+  "mode": "reason",
+  "gold": "data\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": 2,
+  "best_epoch": 2,
+  "epochs": [
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-180",
+      "macro_f1": 0.9787635633150242,
+      "accuracy": 0.9794204115917682,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.9091,
+          "track_order"
+        ],
+        [
+          0.913,
+          "delivery_period"
+        ],
+        [
+          0.9219,
+          "track_refund"
+        ],
+        [
+          0.9312,
+          "get_refund"
+        ],
+        [
+          0.9677,
+          "delivery_options"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "dataset": "bitext",
-  "git_commit": "60ed289",
+  "git_commit": "ccfcb84",
   "runs": {
     "ablation": {
       "mode": "classify",
@@ -274,14 +274,564 @@
           "create_account"
         ]
       ]
+    },
+    "bitext_recipe_a_s42v2": {
+      "mode": "classify",
+      "n_train_examples": 5722,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 3.7,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.9885,
+          "val_accuracy": 0.9891,
+          "invalid": 0
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.992,
+          "val_accuracy": 0.9929,
+          "invalid": 0
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9909,
+          "val_accuracy": 0.9916,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.992,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.6206,
+          "train_loss_last": 0.3286
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.2534,
+          "train_loss_last": 0.2478
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.1766,
+          "train_loss_last": 0.1801
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.9291,
+          "track_refund"
+        ],
+        [
+          0.9474,
+          "get_refund"
+        ],
+        [
+          0.9814,
+          "create_account"
+        ],
+        [
+          0.9839,
+          "delivery_options"
+        ],
+        [
+          0.9848,
+          "registration_problems"
+        ]
+      ]
+    },
+    "bitext_recipe_a_s1337": {
+      "mode": "classify",
+      "n_train_examples": 5722,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 3.7,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9916,
+          "val_accuracy": 0.9924,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9916,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3475,
+          "train_loss_last": 0.1806
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.9291,
+          "track_refund"
+        ],
+        [
+          0.9474,
+          "get_refund"
+        ],
+        [
+          0.9814,
+          "create_account"
+        ],
+        [
+          0.9839,
+          "delivery_options"
+        ],
+        [
+          0.9848,
+          "registration_problems"
+        ]
+      ]
+    },
+    "bitext_ablation_s1337": {
+      "mode": "classify",
+      "n_train_examples": 2861,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 1.0,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9774,
+          "val_accuracy": 0.9782,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9774,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0714,
+          "train_loss_last": 0.0
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.7547,
+          "delivery_period"
+        ],
+        [
+          0.7937,
+          "track_order"
+        ],
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9468,
+          "get_refund"
+        ],
+        [
+          0.9877,
+          "create_account"
+        ]
+      ]
+    },
+    "bitext_recipe_b_s1337": {
+      "mode": "reason",
+      "n_train_examples": 2861,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 2.2,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9788,
+          "val_accuracy": 0.9794,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9788,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.439,
+          "train_loss_last": 0.2089
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.9091,
+          "track_order"
+        ],
+        [
+          0.913,
+          "delivery_period"
+        ],
+        [
+          0.9219,
+          "track_refund"
+        ],
+        [
+          0.9312,
+          "get_refund"
+        ],
+        [
+          0.9677,
+          "delivery_options"
+        ]
+      ]
+    },
+    "bitext_recipe_a_s2024": {
+      "mode": "classify",
+      "n_train_examples": 5722,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 3.7,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9908,
+          "val_accuracy": 0.9916,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9908,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3477,
+          "train_loss_last": 0.1797
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9524,
+          "get_refund"
+        ],
+        [
+          0.975,
+          "create_account"
+        ],
+        [
+          0.9798,
+          "registration_problems"
+        ],
+        [
+          0.9839,
+          "delivery_options"
+        ]
+      ]
+    },
+    "bitext_ablation_s2024": {
+      "mode": "classify",
+      "n_train_examples": 2861,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 1.0,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9791,
+          "val_accuracy": 0.9798,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9791,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0711,
+          "train_loss_last": 0.0
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.7853,
+          "delivery_period"
+        ],
+        [
+          0.8108,
+          "track_order"
+        ],
+        [
+          0.9375,
+          "track_refund"
+        ],
+        [
+          0.9468,
+          "get_refund"
+        ],
+        [
+          0.9877,
+          "create_account"
+        ]
+      ]
+    },
+    "bitext_recipe_b_s2024": {
+      "mode": "reason",
+      "n_train_examples": 2861,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 2.2,
+      "learning_curve": [
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9791,
+          "val_accuracy": 0.9798,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 2,
+      "best_val_macro_f1": 0.9791,
+      "diminishing_returns_after_epoch": 2,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.4385,
+          "train_loss_last": 0.2087
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.8772,
+          "track_order"
+        ],
+        [
+          0.8876,
+          "delivery_period"
+        ],
+        [
+          0.9291,
+          "track_refund"
+        ],
+        [
+          0.9424,
+          "get_refund"
+        ],
+        [
+          0.962,
+          "create_account"
+        ]
+      ]
     }
   },
   "seed_variance": {
     "seeds": [
-      42
+      42,
+      1337,
+      2024
     ],
-    "n_seeds": 1,
-    "mean_sigma": null
+    "n_seeds": 3,
+    "families": {
+      "recipe_a": {
+        "epoch": 2,
+        "n": 3,
+        "macro_f1_mean": 0.9915,
+        "macro_f1_sigma": 0.0006,
+        "per_run": {
+          "bitext_recipe_a_s42v2": 0.992,
+          "bitext_recipe_a_s1337": 0.9916,
+          "bitext_recipe_a_s2024": 0.9908
+        }
+      },
+      "ablation": {
+        "epoch": 2,
+        "n": 3,
+        "macro_f1_mean": 0.9788,
+        "macro_f1_sigma": 0.0013,
+        "per_run": {
+          "ablation": 0.98,
+          "bitext_ablation_s1337": 0.9774,
+          "bitext_ablation_s2024": 0.9791
+        }
+      },
+      "recipe_b": {
+        "epoch": 2,
+        "n": 3,
+        "macro_f1_mean": 0.9779,
+        "macro_f1_sigma": 0.0019,
+        "per_run": {
+          "recipe_b": 0.9757,
+          "bitext_recipe_b_s1337": 0.9788,
+          "bitext_recipe_b_s2024": 0.9791
+        }
+      },
+      "recipe_a_sawtooth_legacy": {
+        "epoch": 2,
+        "n": 1,
+        "macro_f1_mean": 0.9886,
+        "macro_f1_sigma": null,
+        "per_run": {
+          "recipe_a": 0.9886
+        }
+      }
+    }
   },
   "adjustment_changelog": [
     {
@@ -311,7 +861,8 @@
   ],
   "caveats": [
     "Recipe A's training file interleaves a classify row and an explain row per ticket (5,722 rows vs 2,861), so at equal 'epochs' A got ~2x the optimizer steps of B/ablation (179 vs 90 steps/epoch). A's win may partly be optimizer budget, not multi-task signal alone \u2014 owner to interpret; an ablation-at-6-epochs or step-matched control would separate the two.",
-    "Bitext recipe_a additionally trained under the unintended stage-sawtooth LR schedule (see changelog), with a second asymmetry: its per-epoch checkpoints were taken at LR~0 (annealed) while ablation/recipe_b epoch-1/2 checkpoints were mid-decay snapshots. Both effects plausibly flatter recipe A's best-epoch score. All subsequent runs use the fixed full-run schedule; a fixed-schedule re-run of bitext recipe_a s42 is queued in the matrix (train/matrix.py) to re-measure the headline number.",
+    "Bitext recipe_a's original run trained under the unintended stage-sawtooth LR schedule (see changelog) with annealed-checkpoint selection asymmetry - both suspected of flattering its 0.9886. RESOLVED 2026-07-30: the fixed-schedule re-run (bitext_recipe_a_s42v2) scored HIGHER (0.9920 @2; seeds 0.9920/0.9916/0.9908, sigma 0.0006), refuting the inflation hypothesis - the sawtooth if anything suppressed recipe A. The legacy sawtooth run is kept as recipe_a_sawtooth_legacy for the record; all seed statistics use fixed-schedule runs only. Note the re-run used the bs16xga2 memory layout (same effective batch 32) - see the batch-layout changelog entry.",
+    "Batch memory layout: runs up to 2026-07-30 ~01:00 used per-device batch 32 x grad-accum 1; later runs (incl. all extra seeds + bitext_recipe_a_s42v2) used 16x2 after a Windows WDDM VRAM livelock made bs32 unreliable. Effective batch, optimizer step count, and LR schedule are identical; only gradient-reduction order differs (fp-noise level). Recorded per run in run_config_*.json.",
     "delivery_period <-> track_order is the known Bitext label-noise pair (see M1 gold-gate audit): it is the floor on ablation and recipe B per-class F1 at every epoch, while recipe A largely resolved it by epoch 2.",
     "Constrained JSON decoding produced zero invalid outputs across all runs and epochs, so invalid-rate differences play no role in the comparison.",
     "Single seed (42) so far - seed-variance error bars (PAPER-OUTLINE Part B) still owed; val macro-F1 deltas between recipes (A +0.86pt over ablation, B -0.44pt under it at best epochs) are not yet distinguishable from seed noise.",

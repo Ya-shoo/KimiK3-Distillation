@@ -1,0 +1,59 @@
+{
+  "n": 2381,
+  "macro_f1": 0.31480733049105314,
+  "accuracy": 0.3498530029399412,
+  "invalid": 0,
+  "invalid_rate": 0.0,
+  "missing_preds": 0,
+  "worst_classes": [
+    [
+      0.0,
+      "check_payment_methods"
+    ],
+    [
+      0.0,
+      "track_refund"
+    ],
+    [
+      0.02,
+      "check_refund_policy"
+    ],
+    [
+      0.0208,
+      "get_refund"
+    ],
+    [
+      0.0213,
+      "check_cancellation_fee"
+    ]
+  ],
+  "per_class_f1": {
+    "cancel_order": 0.5342,
+    "change_order": 0.1284,
+    "change_shipping_address": 0.2373,
+    "check_cancellation_fee": 0.0213,
+    "check_invoice": 0.084,
+    "check_payment_methods": 0.0,
+    "check_refund_policy": 0.02,
+    "complaint": 0.4412,
+    "contact_customer_service": 0.4206,
+    "contact_human_agent": 0.6224,
+    "create_account": 0.531,
+    "delete_account": 0.5116,
+    "delivery_options": 0.3453,
+    "delivery_period": 0.5,
+    "edit_account": 0.3091,
+    "get_invoice": 0.3015,
+    "get_refund": 0.0208,
+    "newsletter_subscription": 0.655,
+    "payment_issue": 0.3108,
+    "place_order": 0.124,
+    "recover_password": 0.4451,
+    "registration_problems": 0.6509,
+    "review": 0.2034,
+    "set_up_shipping_address": 0.5075,
+    "switch_account": 0.189,
+    "track_order": 0.3852,
+    "track_refund": 0.0
+  }
+}
