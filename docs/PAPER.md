@@ -1,9 +1,9 @@
 # Distilling a Frontier Model into a 4B Specialist for Intent Triage: A Controlled Study on Two Benchmarks
 
-> **STATUS: DRAFT v1** (2026-07-30, mid-M2). Numbers marked ⟦pending⟧ await the
-> multi-seed runs, the Bitext fixed-schedule re-run, and the M3 frontier panel.
-> Interpretation-bearing passages are marked **[OWNER REVIEW]** — the A/B/ablation
-> reading is the owner's call per the project's collaboration model.
+> **STATUS: DRAFT v2** (2026-07-30, M2 complete: 17/17 runs, 3 seeds/recipe both
+> benchmarks). Remaining ⟦pending⟧ slots await only the M3 frontier panel (teacher
+> baseline + costs). Interpretation-bearing passages are marked **[OWNER REVIEW]** —
+> the A/B/ablation reading is the owner's call per the project's collaboration model.
 
 ## 1. Abstract
 
@@ -12,13 +12,15 @@ We distill Kimi K3 (a 2.8T-parameter frontier reasoning model) into Qwen3-4B, a
 the *rationale-distillation* recipe ("Distilling Step-by-Step") with a controlled
 experiment on two benchmarks: Bitext (27 intents, synthetic) and CLINC150 (150
 intents + out-of-scope, real). A QLoRA student trained on ~2.8–5.7k gold-gated
-teacher labels reaches **0.9886** val macro-F1 on Bitext and **0.9619** on
-CLINC-151 at seed 42. The controlled comparison contradicts the popular recipe on
-real data: on CLINC, **label-only training beats both rationale recipes** — even
-when optimizer budget is step-matched — and the reason-then-label recipe
-additionally collapses out-of-scope recall (0.33 vs 0.71), the metric a triage
-deployment relies on for escalation. Retention against the teacher and cost
-multiples are ⟦pending: M3 panel⟧. Seed-variance error bars: ⟦pending: 3-seed runs⟧.
+teacher labels reaches **0.9915 ± 0.0006** val macro-F1 on Bitext and
+**0.9611 ± 0.0008** on CLINC-151 (3 seeds). The controlled comparison yields a
+mirror-image result: the multi-task rationale recipe **wins on the synthetic
+benchmark (+1.3 pt, ~8σ) and loses on the real one (−0.5 pt, ~4σ)** — the loss
+persisting when optimizer budget is step-matched — and the reason-then-label
+recipe collapses out-of-scope recall (0.30 vs 0.69), the metric a triage
+deployment relies on for escalation. Rationale distillation's benefit is not a
+property of the method alone but of the data distribution it meets. Retention
+against the teacher and cost multiples: ⟦pending: M3 panel⟧.
 
 ## 2. Introduction
 
@@ -34,8 +36,8 @@ This report asks two questions. **(1) How much of the teacher's accuracy does a
 by identical code, M3.) **(2) Does distilling the teacher's *reasoning* — not just
 its labels — measurably help,** as reported by Hsieh et al. (2023, "Distilling
 Step-by-Step"), **once optimizer budget, LR schedule, and checkpoint selection are
-properly controlled?** Our answer to (2), on a real benchmark, is currently *no* —
-see §7.3 and §9.
+properly controlled?** Our answer to (2) is *it depends on the data*: a robust yes
+(~8σ) on the synthetic benchmark, a robust no (~4σ) on the real one — see §7.3.
 
 ## 3. Background
 
@@ -102,58 +104,63 @@ converts teacher confusions into training-set class deletions. Mitigation
   transformers 5.5, bf16. Environment specifics and Windows-stack workarounds
   (staged epochs, WDDM livelock mitigations, batch-layout note): `docs/ENV-4090-WINDOWS.md`.
 - Teacher/panel pricing: pinned in `configs/prices.yaml` ⟦snapshot date at M3⟧.
-- Seeds: 42 complete; 1337 and 2024 ⟦in flight⟧. Extra seeds are scored at the
-  primary seed's best epoch (selection held fixed across seeds).
+- Seeds: 42, 1337, 2024 (complete). Extra seeds are scored at the primary seed's
+  best epoch (selection held fixed across seeds).
 - Metrics: macro-F1 (headline), accuracy, per-class F1, invalid rate, oos
   recall/precision (CLINC). Scorer shared verbatim with the M3 panel.
 
 ## 7. Results
 
-### 7.1 Headline (val macro-F1, seed 42; ⟦mean ± σ pending 3-seed runs⟧)
+### 7.1 Headline (val macro-F1, mean ± sample σ over seeds {42, 1337, 2024})
 
-| Recipe | Bitext-27 | CLINC-151 | CLINC oos recall |
+| Recipe | Bitext-27 (best @2) | CLINC-151 (best @3) | CLINC oos recall (mean) |
 |---|---|---|---|
-| Ablation (label-only) | 0.9800 @2 | **0.9619 @3** | 0.71 |
-| Ablation, step-matched 6-epoch control | — | **0.9624 @3** | 0.72 |
-| Recipe A (multi-task) | **0.9886 @2** † | 0.9574 @3 | 0.72 |
-| Recipe B (reason-then-label) | 0.9757 @2 | 0.9316 @3 | **0.33** |
+| Ablation (label-only) | 0.9788 ± 0.0013 | **0.9611 ± 0.0008** | 0.69 |
+| Ablation, step-matched 6-epoch control | — | **0.9624** (n=1) | 0.72 |
+| Recipe A (multi-task) | **0.9915 ± 0.0006** | 0.9563 ± 0.0015 | 0.72 |
+| Recipe B (reason-then-label) | 0.9779 ± 0.0019 | 0.9317 ± 0.0013 | **0.30** |
 
-† Measured under an unintended warm-restart LR schedule that plausibly flatters
-recipe A (see §9); a corrected re-run is ⟦in flight⟧.
-
-Invalid outputs: zero everywhere except CLINC recipe B (8–18 of 3,100, scored wrong).
+Invalid outputs: zero everywhere except CLINC recipe B (7–18 of 3,100 per seed,
+scored wrong) — all are token-budget exhaustion: the generated rationale overruns
+the 512-token cap before the `category` field is emitted, so even constrained
+re-decoding cannot rescue the row (§7.4).
 
 ### 7.2 Retention vs teacher — ⟦pending M3: K3 baseline scored by identical code⟧
 
-### 7.3 The ablation result **[OWNER REVIEW]**
+### 7.3 The ablation result: a benchmark-dependent mirror **[OWNER REVIEW]**
 
-On Bitext, recipe A beat the ablation by +0.86 pt. On CLINC the ordering inverts:
-label-only wins by 0.45 pt over A and 3.0 pt over B. Three controls make the CLINC
-result hard to dismiss:
-- **Step-matching:** recipe A sees 2 rows/query, so at equal epochs it gets ~2×
-  the optimizer steps. The 6-epoch ablation control (1,074 steps ≈ A's 1,071)
-  still beats A (0.9624 vs 0.9574) — the rationale's multi-task signal does not
-  merely underperform per-step; it underperforms at matched budget.
-- **Schedule symmetry:** all CLINC runs share one corrected full-run LR schedule
-  (§9 documents the Bitext asymmetry).
-- **Selection symmetry:** every recipe gets per-epoch checkpoints and val-based
-  best-epoch selection.
+Recipe A beats the ablation on Bitext by **+1.27 pt at ~8σ** (0.9915 ± 0.0006 vs
+0.9788 ± 0.0013) and loses to it on CLINC by **−0.48 pt at ~4σ** (0.9563 ± 0.0015
+vs 0.9611 ± 0.0008). Both effects are far outside seed noise; recipe B never beats
+the ablation anywhere. Controls that make the inversion hard to dismiss:
+- **Step-matching (CLINC):** recipe A sees 2 rows/query, so at equal epochs it
+  gets ~2× the optimizer steps. The 6-epoch ablation control (1,074 steps ≈ A's
+  1,071) still beats A (0.9624 vs 0.9563 ± 0.0015) — the multi-task signal
+  underperforms at matched budget, not merely per step.
+- **Schedule/selection symmetry:** all seed-statistics runs share one corrected
+  full-run LR schedule, per-epoch checkpoints, and val-based selection. The
+  suspected Bitext schedule artifact was tested directly and refuted (§9).
 
-Candidate readings (to be adjudicated with seed error bars ⟦pending⟧): (i) the
-Bitext advantage was partly artifactual (schedule + annealed checkpoints + step
-budget); (ii) rationales help on templated data but add little on short, real
-queries where the label is nearly surface-readable; (iii) rationale training
-competes with label training for capacity at fixed LoRA rank.
+Candidate readings for the mirror: (i) Bitext's templated inputs reward the
+richer training signal — rationales effectively teach the template grammar —
+while CLINC's short real queries carry the label near the surface, so the
+rationale adds gradient noise, not information; (ii) at fixed LoRA capacity
+(r=16), rationale learning competes with label learning, and only pays where the
+task is compositional enough to amortize it; (iii) synthetic benchmarks can
+overstate rationale-distillation gains generally — a caution for the literature,
+since method papers frequently evaluate on clean/templated data.
 
 ### 7.4 The oos/escalate collapse under reason-then-label **[OWNER REVIEW]**
 
-Recipe B's oos recall on CLINC is 0.28–0.35 across epochs vs 0.70–0.79 for both
-label-only recipes, with oos precision comparable. Reading (i): generating the
-rationale first commits the model to evidence-for-some-intent before the label
-token is emitted — the rationale format has no natural "this fits nothing" path,
-so probability mass flows to the nearest in-scope intent. For deployments where
-escalation is the point of the system, this is an argument against
-rationale-in-the-output regardless of macro-F1.
+Recipe B's oos recall on CLINC is **0.30 mean (0.26–0.35) across all three seeds**
+vs 0.69–0.72 for both label-only-at-inference recipes, with precision comparable.
+Reading: generating the rationale first commits the model to
+evidence-for-some-intent before the label token is emitted — the rationale format
+has no natural "this fits nothing" path, so probability mass flows to the nearest
+in-scope intent. The same mechanism produces recipe B's only-in-the-project
+invalid outputs: rationales that ramble past the generation budget before the
+label appears. For deployments where escalation is the point of the system, these
+are arguments against rationale-in-the-output regardless of macro-F1.
 
 ### 7.5 Learning curves and epoch knees
 
@@ -173,18 +180,24 @@ reason-mode — a 6× serving-cost difference against recipe B).
 
 - **Bitext is synthetic**; its near-ceiling scores overstate real-world accuracy.
   Mitigated by CLINC (real) + oos.
-- **The Bitext recipe-A number carries three asymmetries**, found by post-run
-  audit: (1) a per-stage LR-scheduler rebuild gave A (the only staged run) a
-  warm-restart sawtooth others didn't get; (2) A's per-epoch checkpoints were
-  LR-annealed while others' were mid-decay snapshots — flattering A's best-epoch
-  selection; (3) A had 2× optimizer steps at equal epochs. All three are corrected
-  or controlled in the CLINC track; a corrected Bitext re-run is ⟦in flight⟧.
-  The audit trail (trainer-log LR curves) is in `artifacts/eval/`.
+- **A suspected artifact was found, tested, and refuted.** A post-run audit
+  flagged three asymmetries favoring the original Bitext recipe-A run (a
+  per-stage LR-scheduler rebuild that produced a warm-restart sawtooth; annealed
+  checkpoints vs others' mid-decay snapshots; 2× optimizer steps at equal
+  epochs). The corrected re-run scored *higher* (0.9920 vs 0.9886), refuting the
+  inflation hypothesis; all reported seed statistics use fixed-schedule runs
+  only, and the legacy run is retained in the artifacts for the record. Audit
+  trail (trainer-log LR curves): `artifacts/eval/`.
+- **A mid-experiment memory-layout change** (per-device batch 32×1 → 16×2 after a
+  Windows VRAM livelock; identical effective batch, step count, and schedule) is
+  recorded per run in `run_config_*.json`. Gradient-reduction order is the only
+  difference; observed seed σ (≤0.002) bounds its effect.
 - **Label noise:** Bitext `delivery_period↔track_order` caps ablation/B per-class
   F1; CLINC `reminder`/`reminder_update` (and kin) is severe enough to evacuate
   classes through the gold-gate (§4).
-- **Single seed** for every number above — deltas of ≤0.5 pt are not yet
-  distinguishable from seed noise ⟦3-seed σ pending⟧.
+- **Seed count is 3** — adequate for the large effects reported (4–8σ), thin for
+  sub-0.2-pt comparisons (e.g. ablation vs its 6-epoch control, or ablation vs
+  recipe B on Bitext, which are statistical ties at this n).
 - **Teacher prompt fairness across benchmarks:** the student prompts are identical
   across benchmarks by design (frozen recipe); the teacher prompt was adapted per
   benchmark (label glosses, oos instruction).
@@ -201,7 +214,6 @@ per-class sample is not, by itself, the failure mode here.
 ## 11. Limitations and future work
 
 - **K3 baseline + frontier panel (M3)** — the retention claim, the money chart.
-- **Seed variance + corrected Bitext re-run** — ⟦in flight tonight⟧.
 - **Back-fill gate-evacuated classes** with bare gold labels (recovers
   `reminder_update` without trusting contaminated rationales).
 - **Data-efficiency curves** (10/20/30/40 per class): the strongest remaining case
@@ -211,13 +223,15 @@ per-class sample is not, by itself, the failure mode here.
 - Phase 2: priority/escalate fields on owned data; OOD probe of Bitext-trained
   students on real phrasings.
 
-## 12. Conclusion — ⟦drafted after M3; the honest arc so far:⟧ **[OWNER REVIEW]**
+## 12. Conclusion — ⟦finalized after M3; the honest arc so far:⟧ **[OWNER REVIEW]**
 A 4B QLoRA student trained on a few thousand gold-gated frontier labels is a
-strong intent-triage specialist on both a synthetic and a real benchmark. The
-fashionable part of the recipe — distilling rationales — did not survive contact
-with controls on the real benchmark, and actively harmed the escalation signal in
-its reason-then-label form. Distillation earns its keep; the rationale garnish, at
-least at this scale and data regime, has yet to.
+strong intent-triage specialist on both a synthetic (0.99) and a real (0.96)
+benchmark. The fashionable part of the recipe — distilling rationales — turned
+out to be a property of the data, not the method: a large, real win on templated
+data that inverts into a significant loss on real queries, with the
+reason-then-label variant additionally destroying the escalation signal.
+Distillation earns its keep; whether the rationale garnish does depends on
+whether your data looks like a template or like people.
 
 ## Appendix A. Reproducibility
 
