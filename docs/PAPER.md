@@ -1,9 +1,12 @@
 # Distilling a Frontier Model into a 4B Specialist for Intent Triage: A Controlled Study on Two Benchmarks
 
-> **STATUS: DRAFT v1** (2026-07-30, mid-M2). Numbers marked ⟦pending⟧ await the
-> multi-seed runs, the Bitext fixed-schedule re-run, and the M3 frontier panel.
-> Interpretation-bearing passages are marked **[OWNER REVIEW]** — the A/B/ablation
-> reading is the owner's call per the project's collaboration model.
+> **STATUS: DRAFT v2** (2026-07-30). The **M3 frontier panel is in** (§7.2, §8: 5 models
+> on the test split, macro-F1 + cost) and **CLINC 3-seed error bars are in** (§7.1). One
+> number remains ⟦pending⟧: the **student's test macro-F1** — the 4090 selected epochs on
+> val (correct discipline); scoring the best-epoch adapters on the sacred test split is the
+> last measurement, after which retention (§7.2) and the money chart (§8) resolve. Also in
+> flight: Bitext multi-seed + the corrected recipe-A re-run. Interpretation-bearing passages
+> are marked **[OWNER REVIEW]** — the A/B/ablation reading is the owner's call.
 
 ## 1. Abstract
 
@@ -17,8 +20,13 @@ CLINC-151 at seed 42. The controlled comparison contradicts the popular recipe o
 real data: on CLINC, **label-only training beats both rationale recipes** — even
 when optimizer budget is step-matched — and the reason-then-label recipe
 additionally collapses out-of-scope recall (0.33 vs 0.71), the metric a triage
-deployment relies on for escalation. Retention against the teacher and cost
-multiples are ⟦pending: M3 panel⟧. Seed-variance error bars: ⟦pending: 3-seed runs⟧.
+deployment relies on for escalation. On CLINC the label-only win is backed by 3-seed
+error bars (σ≈0.001). A five-model frontier panel scored on the test split places the
+teacher at 95.0/90.8 macro-F1 (Bitext/CLINC) — and a cheaper generalist (Gemini 3 Flash)
+*beats* the teacher on the real benchmark (93.5 vs 90.8) at ~6× lower cost. The student's
+marginal inference cost is ~$0 (owned GPU) vs $190–$2,200 per million tickets/month for
+the cloud panel. The one open number is the student's own test macro-F1 (scored once, with
+the panel), which sets the final retention multiple.
 
 ## 2. Introduction
 
@@ -123,7 +131,51 @@ recipe A (see §9); a corrected re-run is ⟦in flight⟧.
 
 Invalid outputs: zero everywhere except CLINC recipe B (8–18 of 3,100, scored wrong).
 
-### 7.2 Retention vs teacher — ⟦pending M3: K3 baseline scored by identical code⟧
+**CLINC seed variance (3 seeds: 42/1337/2024, val macro-F1 at each seed's best epoch):**
+ablation **0.9611 ± 0.0006**, recipe A **0.9563 ± 0.0012**, recipe B **0.9317 ± 0.0010**.
+The σ is ~0.001, so the ordering is not seed noise: label-only beats recipe A by ~0.5 pt
+(≈4σ) and recipe B by ~2.9 pt, and the step-matched 6-epoch ablation (0.9624) beats recipe
+A as well. On CLINC the negative result for rationale distillation is statistically clean.
+(Bitext multi-seed + the corrected recipe-A re-run are still in flight; its +0.86 pt A-win
+carries the §9 schedule/step confounds and is not yet backed by error bars.)
+
+### 7.2 The frontier panel (test macro-F1), and retention vs teacher
+
+We score a two-tier panel of prompted frontier/efficient models on the **held-out
+test split** (Bitext 4,761 / CLINC 5,500), label-only, with the *same* label glosses
+the teacher saw and the *same* `score.py` used for the student. All five produced
+**0% invalid** output. Reasoning is disabled where the provider allows it, so this is
+the "just prompt a model for the label" regime a team actually compares against.
+
+| Model (tier) | Bitext-27 | CLINC-151 | Cost /1k tickets† |
+|---|---|---|---|
+| **Kimi K3 — teacher** (flagship) | **95.0** | 90.8 | $2.20 |
+| Gemini 3 Flash (flagship) | 93.6 | **93.5** | $0.39 |
+| GPT-5.6 Luna (efficient) | 93.6 | 89.6 | $0.35 |
+| DeepSeek 3.2 (efficient) | 93.2 | 86.6 | $0.19 |
+| Haiku 4.5 (efficient) | 87.9 | 88.3 | $0.79 |
+
+† List API prices (`configs/prices.yaml`, snapshot 2026-07-30) × measured mean tokens;
+see §8. Panel run cost: $22 total on OpenRouter. GPT-5.6 Sol and Fable 5 were scoped
+out on cost (the two priciest flagships at $5/$30 and $10/$50 per 1M).
+
+**Panel finding — the teacher is not the ceiling on real data.** On CLINC, **Gemini 3
+Flash (93.5) beats the K3 teacher (90.8) by 2.7 pt at ~6× lower cost.** K3 leads on the
+synthetic Bitext (95.0) but trails on the real, 151-class benchmark. This matters for
+the distillation framing: the student's teacher is itself beaten by a cheaper generalist
+on the harder task, so "retention of K3" is a floor, not a ceiling, for what a specialist
+could reach.
+
+**Retention (student vs K3 on test).** K3's test macro-F1 — the denominator for the
+≥97.5% retention target (SPEC §1) — is **95.0 (Bitext) / 90.8 (CLINC)**. The numerator,
+the **student's test macro-F1**, is the one number still in flight: the 4090 tuned and
+selected epochs on *val* (correct discipline), and the sacred test set is scored exactly
+once, for student and panel together. The panel half is done (above); the student half —
+best-epoch adapters run on `test_eval.jsonl` — is the final measurement, after which the
+retention ratio and the money chart (§8) resolve. On *val*, the strongest student already
+sits at 0.9886 (Bitext, recipe A) / 0.9611 (CLINC, ablation), i.e. *above* K3's test
+number on the same-family metric — a same-split test read is what makes that comparison
+rigorous.
 
 ### 7.3 The ablation result **[OWNER REVIEW]**
 
@@ -167,7 +219,39 @@ Recipe A's design goal survives regardless of §7.3: label-only inference emits
 ~10 output tokens per query (24 t/s batched classify on one 4090 vs 3.9 t/s for
 reason-mode — a 6× serving-cost difference against recipe B).
 
-## 8. Cost analysis — ⟦pending M3⟧ (savings-at-scale chart per PAPER-OUTLINE Part C)
+## 8. Cost analysis
+
+Cost per ticket is `(mean_input_tokens × input_price + mean_output_tokens ×
+output_price)` at the pinned list prices (`configs/prices.yaml`, snapshot 2026-07-30).
+Inputs are ~660–690 tokens (the shared label-glossary prompt); label-only outputs are
+~10–15 tokens, so **input dominates** — the cost axis is essentially "price per prompt."
+
+**Savings at scale (1M tickets/month), list API prices:**
+
+| Model | $/1k | $/1M tickets/mo |
+|---|---|---|
+| Kimi K3 (teacher) | $2.20 | **$2,200** |
+| Haiku 4.5 | $0.79 | $790 |
+| Gemini 3 Flash | $0.39 | $390 |
+| GPT-5.6 Luna | $0.35 | $350 |
+| DeepSeek 3.2 | $0.19 | $190 |
+| **Student (Qwen3-4B, local)** | **≈$0** | **≈$0 (electricity)** |
+
+The student's marginal inference cost is electricity: recipe A emits ~10 output tokens
+per query and batched `classify` runs at ~24 tok/s on one owned 4090, so 1M tickets/month
+(~0.4 queries/s sustained) is served comfortably by hardware the project already owns.
+Against the **cheapest cloud option (DeepSeek, $190/mo)** the specialist saves ~$190/mo
+per million tickets; against the **teacher ($2,200/mo)**, ~$2,200/mo — before the ~6×
+serving-speed edge of label-only inference over reason-mode (§7.6). The break-even on a
+one-time ~$16 (Bitext) / ~$35 (CLINC) teacher-labeling spend plus a few GPU-hours is
+days, not months, at any realistic ticket volume.
+
+**The hero figure (`money_chart`: cost/1k on a log x-axis vs test macro-F1)** places every
+panel model from the §7.2 table; the student's point — high-and-left, at ~$0 and its
+test macro-F1 — lands once the 4090 test scores arrive. The panel points already show the
+shape: flagships high-and-right (K3 $2.2, accurate), efficient tier clustered mid-left
+(DeepSeek/Luna/Gemini $0.2–0.4), and a wide-open cheap-and-accurate corner for the
+specialist to occupy.
 
 ## 9. Threats to validity
 
