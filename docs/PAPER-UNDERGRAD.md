@@ -13,8 +13,9 @@ customer messages into categories by learning from a frontier model roughly
 1000× its size (Kimi K3). On the locked-away test sets — opened exactly once —
 the student didn't just approach the teacher, it **beat it on both benchmarks**,
 and on the synthetic one it beat *every* system we scored, including four other
-frontier/efficient cloud models. Marginal running cost: ~$0, versus $190–$2,200
-per million messages for the cloud options. The trendy part of the method —
+frontier/efficient cloud models. Running cost: $2–25 per million messages
+depending on how you serve it (electricity → hosted API), versus $190–$2,200
+for the cloud options. The trendy part of the method —
 teaching the student the big model's *reasoning*, not just its answers — turned
 out to be a coin with two faces: a genuine win on synthetic data, a genuine loss
 on real data, both far beyond seed noise. And one reasoning variant quietly broke
@@ -49,9 +50,9 @@ nothing — send it to a human."
 
 | System | Bitext (synthetic, 27-way) | CLINC (real, 151-way) | Cost per 1k messages |
 |---|---|---|---|
-| **Student — Recipe A** | **99.2** 🥇 | 91.0 | ~$0 |
-| **Student — ablation** | 98.5 | **92.2** 🥈 | ~$0 |
-| **Student — Recipe B** | 98.0 | 87.2 ❌ | ~$0 |
+| **Student — Recipe A** | **99.2** 🥇 | 91.0 | <3¢ |
+| **Student — ablation** | 98.5 | **92.2** 🥈 | <3¢ |
+| **Student — Recipe B** | 98.0 | 87.2 ❌ | <3¢ |
 | Kimi K3 (the teacher) | 95.0 | 90.8 | $2.20 |
 | Gemini 3 Flash | 93.6 | **93.5** 🥇 | $0.39 |
 | GPT-5.6 Luna | 93.6 | 89.6 | $0.35 |
@@ -148,12 +149,18 @@ to break it, and publishing the audit either way.
 
 ## The economics (why anyone funds this)
 
-Sorting 1M messages/month costs $2,200 with the teacher, $190–$790 with the
-efficient cloud tier — and ~$0 (electricity) with the student, which outscores
-all of them on Bitext and all but Gemini on CLINC, at ~14 messages/second on
-one gaming GPU. Total one-time spend: ~$51 of teacher labeling + ~$22 of panel
-evaluation + a few GPU-hours (each training run is 1–9 minutes). Break-even is
-measured in days.
+Sorting 1M messages/month costs $2,200 with the teacher and $190–$790 with the
+efficient cloud tier. The student is not literally free, so here it is
+honestly, three ways: **~$2–3 of electricity** on the gaming GPU we own (1M
+messages ≈ 20 GPU-hours at ~14 messages/second), **~$7–14** renting that same
+GPU by the hour, or **≲$25** even if you paid a cloud API to host it — the
+student's prompt is ~70 tokens because the category list lives in its weights,
+while every cloud model re-reads a ~700-token category glossary on every single
+call. Cheapest to worst case, that's 8–100× below the cheapest cloud option —
+and the student outscores all of them on Bitext and all but Gemini on CLINC.
+Total one-time spend: ~$51 of teacher labeling + ~$22 of panel evaluation + a
+few GPU-hours (each training run is 1–9 minutes). Break-even is measured in
+days.
 
 ## What's left
 

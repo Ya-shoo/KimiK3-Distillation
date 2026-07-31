@@ -41,4 +41,11 @@ student-local:
   provider: rtx-4090
   input: 0.0
   output: 0.0
-  note: "QLoRA on owned GPU; marginal cost approximated as electricity (~0)."
+  note: >-
+    QLoRA on owned GPU. Token prices are 0 but serving is NOT free — measured
+    honest range (PAPER.md #8): ~$2-3/1M tickets electricity (19.8 GPU-h @
+    ~400W wall, $0.30/kWh, 14 tickets/s measured on the test pass); ~$7-14/1M
+    renting a 4090-class GPU ($0.35-0.70/hr); <=$25/1M hosted-API ceiling
+    priced at DeepSeek's pinned $0.27/$0.40 per-M rates on the student's ~70
+    input + ~10 output tokens (no label-glossary prompt - the label space
+    lives in the weights).

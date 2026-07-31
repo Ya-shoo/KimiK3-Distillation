@@ -31,9 +31,10 @@ benchmark (+1.3 pt, ~8σ) and loses on the real one (−0.5 pt, ~4σ)** — the 
 persisting under a step-matched optimizer-budget control — and the synthetic win
 localizes almost entirely to a single confusable label pair. Rationale
 distillation's benefit is a property of the data distribution, not of the method.
-The student's marginal inference cost is ~$0 on an owned GPU versus $190–$2,260
-per million tickets for the cloud panel; total one-time project spend (teacher
-labeling + panel) was under $100.
+The student serves 1M tickets for ~$2–3 of electricity on the owned GPU ($7–14
+renting the same GPU; ≲$25 even via a hosted API at our panel's cheapest pinned
+per-token rate) versus $190–$2,260 for the cloud panel; total one-time project
+spend (teacher labeling + panel) was under $100.
 
 ## 2. Introduction
 
@@ -165,16 +166,18 @@ disabled, 0% invalid output from every panel model.
 
 | System | Bitext-27 | CLINC-151 | $/1k tickets† |
 |---|---|---|---|
-| **Student — recipe A** | **0.9923** ① | 0.9103 ③ | ~$0 |
-| **Student — ablation** | 0.9848 ② | **0.9220** ② | ~$0 |
-| **Student — recipe B** | 0.9801 ③ | 0.8724 ⑦ | ~$0 |
+| **Student — recipe A** | **0.9923** ① | 0.9103 ③ | ≤$0.03 |
+| **Student — ablation** | 0.9848 ② | **0.9220** ② | ≤$0.03 |
+| **Student — recipe B** | 0.9801 ③ | 0.8724 ⑦ | ≤$0.03 |
 | Kimi K3 — teacher (flagship) | 0.9498 ④ | 0.9078 ④ | $2.20 |
 | Gemini 3 Flash (flagship) | 0.9364 ⑤ | **0.9345** ① | $0.39 |
 | GPT-5.6 Luna (efficient) | 0.9360 ⑥ | 0.8957 ⑤ | $0.35 |
 | DeepSeek 3.2 (efficient) | 0.9324 ⑦ | 0.8665 ⑧ | $0.19 |
 | Haiku 4.5 (efficient) | 0.8788 ⑧ | 0.8832 ⑥ | $0.79 |
 
-† List API prices × measured mean tokens (§8); students run on an owned GPU.
+† List API prices × measured mean tokens (§8). The student figure spans serving
+scenarios — ~$0.002/1k electricity on the owned 4090 up to ~$0.03/1k as a
+hosted-API ceiling (§8) — and is never literally zero.
 
 **Retention vs the teacher (the pre-registered ≥97.5% gate, SPEC §1):**
 
@@ -335,26 +338,39 @@ dominates** — the cost axis is essentially "price per prompt."
 | Gemini 3 Flash | $0.39 | $390 |
 | GPT-5.6 Luna | $0.35 | $350 |
 | DeepSeek 3.2 | $0.19 | $190 |
-| **Student (Qwen3-4B, local)** | **≈$0** | **≈$0 (electricity)** |
+| **Student — owned 4090 (electricity)** | **~$0.002** | **~$2–3** |
+| **Student — rented 4090-class GPU** | ~$0.01 | ~$7–14 |
+| **Student — hosted-API ceiling** | ~$0.03 | ~$25 |
 
-The student's marginal cost is electricity: label-only inference emits ~10 output
-tokens per query and runs at ~14 tickets/s on one owned 4090 (measured on the
-5,500-row test pass), so 1M tickets/month (~0.4 queries/s sustained) is served
-comfortably by hardware the project already owns. Against the cheapest cloud
-option (DeepSeek, $190/mo) the specialist saves ~$190/mo per million tickets —
-*and outscores it on both benchmarks*; against the teacher, ~$2,200/mo. One-time
-costs: $15.86 + ~$35 teacher labeling, ~$22 panel evaluation (OpenRouter; $40
-list), a few GPU-hours of training (individual runs: 1–9 minutes). Break-even at
-any realistic volume is days. The recipe choice compounds the economics: recipe
-A/ablation serve at ~14 tickets/s vs recipe B's 0.7 on this eval harness — and
-by its ~16× output-token budget, the recipe that scores worst stays the most
-expensive to serve under any stack.
+**The student's cost is small, not zero — quoted honestly across three serving
+scenarios.** Label-only inference emits ~10 output tokens per query and runs at
+~14 tickets/s on one 4090 (measured on the 5,500-row test pass), so 1M tickets is
+~20 GPU-hours (~0.4 queries/s sustained — trivial for hardware the project
+already owns). (1) *Owned GPU:* ~8 kWh at a ~400 W wall draw ≈ **$2–3/1M** at
+$0.30/kWh — the true marginal cost. If the card were bought for this ($~1,800
+amortized over 3 years), add ~$50/mo flat, independent of volume. (2) *Rented
+GPU:* the same 20 hours at prevailing 4090-class rental rates ($0.35–0.70/hr) ≈
+**$7–14/1M** with no hardware owned. (3) *Hosted API (hypothetical ceiling):*
+the student's prompt is ~70 tokens — the label space lives in its weights, so it
+never pays the ~690–710-token label-glossary prompt every panel model pays per
+call. Even priced at the panel's *cheapest* pinned per-token rate (DeepSeek's
+$0.27/$0.40 per M — a 671B-MoE price a 4B would undercut severalfold), 1M
+tickets ≈ **≲$25**. Every scenario is 8–100× below the cheapest cloud option
+(DeepSeek, $190/1M, which the student outscores on both benchmarks) and
+~100–1,000× below the teacher ($2,200/1M). One-time costs: $15.86 + ~$35 teacher
+labeling, ~$22 panel evaluation (OpenRouter; $40 list), a few GPU-hours of
+training (individual runs: 1–9 minutes) — break-even at any realistic volume is
+days. The recipe choice compounds the economics: recipe A/ablation serve at ~14
+tickets/s vs recipe B's 0.7 on this eval harness — and by its ~16× output-token
+budget, the recipe that scores worst stays the most expensive to serve under any
+stack.
 
 **The money chart** (cost/1k, log x-axis, vs test macro-F1): the student sits in
-the formerly empty cheap-and-accurate corner — top-left — on both benchmarks; on
-Bitext it is also simply the top point. Flagships sit high-right (K3 at $2.2);
-the efficient tier clusters mid-left ($0.19–0.79) below the student's accuracy on
-Bitext and (except Gemini) on CLINC.
+the formerly empty cheap-and-accurate corner — top-left, at $0.002–0.03/1k
+depending on serving scenario — on both benchmarks; on Bitext it is also simply
+the top point. Flagships sit high-right (K3 at $2.2); the efficient tier
+clusters mid-left ($0.19–0.79) below the student's accuracy on Bitext and
+(except Gemini) on CLINC.
 
 ## 9. Threats to validity
 
@@ -435,7 +451,8 @@ decomposes into a documented composition shift (§7.5), not overfitting.
 A 4B QLoRA student trained on a few thousand gold-gated frontier labels doesn't
 just retain a 2.8T teacher's intent-triage accuracy — it beats the teacher on
 both benchmarks and tops the entire eight-system leaderboard on one of them, at
-~$0 marginal cost vs $190–$2,200 per million tickets for the cloud. The
+$2–25 per million tickets (electricity → hosted-API ceiling) vs $190–$2,200 for
+the cloud. The
 fashionable part of the recipe — distilling rationales — turned out to be a
 property of the data, not the method: a large, real win on templated data
 (localized to one confusable label pair) that inverts into a significant loss on

@@ -8,8 +8,8 @@
 There's a giant, super-smart AI that costs real money every single time you ask
 it a question. We used it as a **teacher**: it did a few thousand practice
 problems for us, one time. Then we used those practice problems to train a
-tiny AI — about a thousand times smaller — that runs for free on a home gaming
-computer. On the final exam, **the tiny student scored higher than its giant
+tiny AI — about a thousand times smaller — that runs on a home gaming computer
+for a couple of dollars of electricity. On the final exam, **the tiny student scored higher than its giant
 teacher. On both exams. And on one exam it beat every AI we tested, period.**
 
 ## What was the job?
@@ -18,7 +18,7 @@ Sorting messages. A company gets thousands of messages like *"Where's my
 package?"* or *"I want my money back"* — and each one needs to go in the right
 bin (there were 27 bins in one exam, 151 in the other). Big AIs are great at
 this, but paying a giant AI to sort a million messages costs about **$2,200 a
-month**. Our tiny student does it for about **$0** — just the electricity.
+month**. Our tiny student does it for **a couple of dollars of electricity**.
 
 ## How did we teach it?
 
@@ -79,9 +79,11 @@ job, a tiny specialist that studied beats a giant genius that didn't.
 ## Why it matters
 
 Sorting a million messages a month: giant teacher, ~$2,200. Cheapest big-AI
-option, ~$190. Our student: **~$0**, on a computer we already own, while
-scoring *higher* than almost all of them. Total cost to build it: about $73
-plus a few hours of computer time. It pays for itself in days.
+option, ~$190. Our student: **about $2–3 of electricity** on a computer we
+already own (and even if we rented a computer or paid a company to run it for
+us, at most about $25), while scoring *higher* than almost all of them. Total
+cost to build it: about $73 plus a few hours of computer time. It pays for
+itself in days.
 
 And one warning for the grown-ups: the student is still worse than the big AIs
 at raising its hand on trick questions. Fixing that comes next.
