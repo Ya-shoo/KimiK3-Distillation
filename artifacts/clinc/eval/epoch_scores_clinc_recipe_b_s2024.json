@@ -1,0 +1,45 @@
+{
+  "run": "clinc_recipe_b_s2024",
+  "mode": "reason",
+  "gold": "data\\clinc\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": 3,
+  "best_epoch": 3,
+  "epochs": [
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-537",
+      "macro_f1": 0.9330344793877042,
+      "accuracy": 0.9258064516129032,
+      "invalid": 9,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4,
+          "oos"
+        ],
+        [
+          0.4528,
+          "reminder"
+        ],
+        [
+          0.4667,
+          "accept_reservations"
+        ],
+        [
+          0.6939,
+          "restaurant_reservation"
+        ]
+      ],
+      "oos": {
+        "recall": 0.26,
+        "precision": 0.8667,
+        "n_gold": 100,
+        "n_pred": 30
+      }
+    }
+  ]
+}

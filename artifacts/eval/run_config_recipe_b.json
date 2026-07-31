@@ -1,0 +1,33 @@
+{
+  "name": "recipe_b",
+  "base": "Qwen/Qwen3-4B",
+  "data": "data\\train\\recipe_b.messages.jsonl",
+  "n_examples": 2861,
+  "knobs": {
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "learning_rate": 0.0002,
+    "epochs": 3,
+    "per_device_batch": 32,
+    "grad_accum": 1,
+    "max_seq_len": 256,
+    "completion_only_loss": true,
+    "warmup_ratio": 0.03,
+    "lr_scheduler": "linear",
+    "weight_decay": 0.01,
+    "lora_dropout": 0.0,
+    "seed": 42
+  },
+  "git_commit": "7dc099e",
+  "train_minutes": 8.8,
+  "final_loss": 0.4394107672903273
+}

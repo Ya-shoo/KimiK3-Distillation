@@ -1,0 +1,6 @@
+{
+  "recipe_a": {"anchor": "clinc_recipe_a_s42", "members": ["clinc_recipe_a_s42", "clinc_recipe_a_s1337", "clinc_recipe_a_s2024"]},
+  "ablation": {"anchor": "clinc_ablation_s42", "members": ["clinc_ablation_s42", "clinc_ablation_s1337", "clinc_ablation_s2024"]},
+  "recipe_b": {"anchor": "clinc_recipe_b_s42", "members": ["clinc_recipe_b_s42", "clinc_recipe_b_s1337", "clinc_recipe_b_s2024"]},
+  "ablation_ctrl6": {"anchor": "clinc_ablation_ctrl6_s42", "members": ["clinc_ablation_ctrl6_s42"]}
+}

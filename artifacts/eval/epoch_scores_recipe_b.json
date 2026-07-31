@@ -1,0 +1,96 @@
+{
+  "run": "recipe_b",
+  "mode": "reason",
+  "gold": "data/train/val_eval.jsonl",
+  "limit": null,
+  "best_epoch": 2,
+  "epochs": [
+    {
+      "epoch": 1,
+      "checkpoint": "checkpoint-90",
+      "macro_f1": 0.9679599441540674,
+      "accuracy": 0.9693406131877362,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.7329,
+          "delivery_period"
+        ],
+        [
+          0.7701,
+          "track_order"
+        ],
+        [
+          0.9206,
+          "track_refund"
+        ],
+        [
+          0.9479,
+          "get_refund"
+        ],
+        [
+          0.9576,
+          "create_account"
+        ]
+      ]
+    },
+    {
+      "epoch": 2,
+      "checkpoint": "checkpoint-180",
+      "macro_f1": 0.9756548676722835,
+      "accuracy": 0.9764804703905922,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.8488,
+          "delivery_period"
+        ],
+        [
+          0.8523,
+          "track_order"
+        ],
+        [
+          0.9302,
+          "track_refund"
+        ],
+        [
+          0.9418,
+          "get_refund"
+        ],
+        [
+          0.9625,
+          "create_account"
+        ]
+      ]
+    },
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-270",
+      "macro_f1": 0.97196882206698,
+      "accuracy": 0.9731205375892482,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.7778,
+          "delivery_period"
+        ],
+        [
+          0.8108,
+          "track_order"
+        ],
+        [
+          0.9219,
+          "track_refund"
+        ],
+        [
+          0.9312,
+          "get_refund"
+        ],
+        [
+          0.9753,
+          "create_account"
+        ]
+      ]
+    }
+  ]
+}

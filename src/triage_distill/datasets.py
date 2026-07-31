@@ -25,6 +25,7 @@ class DatasetPaths:
     subsample_manifest: Path
     teacher_prompt: Path       # the teacher's design-surface .md
     train_dir: Path           # *.messages.jsonl + val_eval.jsonl
+    eval_dir: Path            # git-tracked eval results (HANDOFF §10/§11)
 
 
 DATASETS = {
@@ -36,6 +37,7 @@ DATASETS = {
         subsample_manifest=_A / "subsample_manifest.json",
         teacher_prompt=_P / "teacher.md",
         train_dir=_D / "train",
+        eval_dir=_A / "eval",
     ),
     "clinc": DatasetPaths(
         name="clinc",
@@ -45,6 +47,7 @@ DATASETS = {
         subsample_manifest=_A / "clinc" / "subsample_manifest.json",
         teacher_prompt=_P / "teacher_clinc.md",
         train_dir=_D / "clinc" / "train",
+        eval_dir=_A / "clinc" / "eval",
     ),
 }
 

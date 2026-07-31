@@ -1,0 +1,891 @@
+{
+  "dataset": "clinc",
+  "git_commit": "d8d3eac",
+  "runs": {
+    "clinc_ablation_s42": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 32,
+        "grad_accum": 1,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 2.3,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.9549,
+          "val_accuracy": 0.9539,
+          "invalid": 0
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9601,
+          "val_accuracy": 0.9594,
+          "invalid": 0
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9619,
+          "val_accuracy": 0.9606,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9619,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.1608,
+          "train_loss_last": 0.0076
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.0016,
+          "train_loss_last": 0.0061
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.0002,
+          "train_loss_last": 0.0001
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6667,
+          "reminder"
+        ],
+        [
+          0.7368,
+          "restaurant_reservation"
+        ],
+        [
+          0.7889,
+          "oos"
+        ],
+        [
+          0.8205,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_a_s42": {
+      "mode": "classify",
+      "n_train_examples": 11408,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 32,
+        "grad_accum": 1,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 8.0,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.946,
+          "val_accuracy": 0.9458,
+          "invalid": 0
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9572,
+          "val_accuracy": 0.9568,
+          "invalid": 0
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9574,
+          "val_accuracy": 0.9568,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9574,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.5432,
+          "train_loss_last": 0.3228
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.2495,
+          "train_loss_last": 0.2244
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.1606,
+          "train_loss_last": 0.1555
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6538,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "accept_reservations"
+        ],
+        [
+          0.7805,
+          "restaurant_reservation"
+        ],
+        [
+          0.809,
+          "oos"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s42": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 4.1,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.9054,
+          "val_accuracy": 0.8974,
+          "invalid": 18
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9255,
+          "val_accuracy": 0.9184,
+          "invalid": 11
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9316,
+          "val_accuracy": 0.9255,
+          "invalid": 8
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9316,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.6675,
+          "train_loss_last": 0.392
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.29,
+          "train_loss_last": 0.2932
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.2042,
+          "train_loss_last": 0.1907
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4815,
+          "reminder"
+        ],
+        [
+          0.4853,
+          "oos"
+        ],
+        [
+          0.5806,
+          "accept_reservations"
+        ],
+        [
+          0.6667,
+          "restaurant_reservation"
+        ]
+      ]
+    },
+    "clinc_ablation_ctrl6_s42": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 6.0,
+        "per_device_batch": 32,
+        "grad_accum": 1,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 42
+      },
+      "train_minutes": 2.0,
+      "learning_curve": [
+        {
+          "epoch": 1,
+          "val_macro_f1": 0.947,
+          "val_accuracy": 0.9458,
+          "invalid": 0
+        },
+        {
+          "epoch": 2,
+          "val_macro_f1": 0.9594,
+          "val_accuracy": 0.9577,
+          "invalid": 0
+        },
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9624,
+          "val_accuracy": 0.9619,
+          "invalid": 0
+        },
+        {
+          "epoch": 4,
+          "val_macro_f1": 0.9596,
+          "val_accuracy": 0.9587,
+          "invalid": 0
+        },
+        {
+          "epoch": 5,
+          "val_macro_f1": 0.9614,
+          "val_accuracy": 0.9606,
+          "invalid": 0
+        },
+        {
+          "epoch": 6,
+          "val_macro_f1": 0.9617,
+          "val_accuracy": 0.9606,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9624,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.1997,
+          "train_loss_last": 0.0119
+        },
+        {
+          "epoch": 2,
+          "train_loss_mean": 0.0029,
+          "train_loss_last": 0.0069
+        },
+        {
+          "epoch": 3,
+          "train_loss_mean": 0.0006,
+          "train_loss_last": 0.0001
+        },
+        {
+          "epoch": 4,
+          "train_loss_mean": 0.0002,
+          "train_loss_last": 0.0001
+        },
+        {
+          "epoch": 5,
+          "train_loss_mean": 0.0002,
+          "train_loss_last": 0.0
+        },
+        {
+          "epoch": 6,
+          "train_loss_mean": 0.0,
+          "train_loss_last": 0.0
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6667,
+          "reminder"
+        ],
+        [
+          0.7778,
+          "maybe"
+        ],
+        [
+          0.8182,
+          "no"
+        ],
+        [
+          0.8182,
+          "oos"
+        ]
+      ]
+    },
+    "clinc_ablation_s1337": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 2.0,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9604,
+          "val_accuracy": 0.9584,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9604,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0533,
+          "train_loss_last": 0.0001
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6667,
+          "reminder"
+        ],
+        [
+          0.7368,
+          "restaurant_reservation"
+        ],
+        [
+          0.75,
+          "oos"
+        ],
+        [
+          0.8205,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_a_s1337": {
+      "mode": "classify",
+      "n_train_examples": 11408,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 7.3,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9546,
+          "val_accuracy": 0.9539,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9546,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.317,
+          "train_loss_last": 0.1563
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6415,
+          "reminder"
+        ],
+        [
+          0.7619,
+          "restaurant_reservation"
+        ],
+        [
+          0.7647,
+          "accept_reservations"
+        ],
+        [
+          0.8023,
+          "oos"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s1337": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 1337
+      },
+      "train_minutes": 4.3,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9305,
+          "val_accuracy": 0.9235,
+          "invalid": 7
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9305,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3845,
+          "train_loss_last": 0.1907
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0952,
+          "reminder_update"
+        ],
+        [
+          0.4314,
+          "reminder"
+        ],
+        [
+          0.438,
+          "oos"
+        ],
+        [
+          0.5714,
+          "accept_reservations"
+        ],
+        [
+          0.6939,
+          "restaurant_reservation"
+        ]
+      ]
+    },
+    "clinc_ablation_s2024": {
+      "mode": "classify",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 2.0,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.9609,
+          "val_accuracy": 0.9594,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.9609,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.0533,
+          "train_loss_last": 0.0001
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7753,
+          "oos"
+        ],
+        [
+          0.7895,
+          "restaurant_reservation"
+        ],
+        [
+          0.85,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_a_s2024": {
+      "mode": "classify",
+      "n_train_examples": 11408,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 7.2,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.957,
+          "val_accuracy": 0.9565,
+          "invalid": 0
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.957,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3178,
+          "train_loss_last": 0.1569
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6415,
+          "reminder"
+        ],
+        [
+          0.8182,
+          "oos"
+        ],
+        [
+          0.8293,
+          "restaurant_reservation"
+        ],
+        [
+          0.8333,
+          "accept_reservations"
+        ]
+      ]
+    },
+    "clinc_recipe_b_s2024": {
+      "mode": "reason",
+      "n_train_examples": 5704,
+      "knobs": {
+        "lora_r": 16,
+        "lora_alpha": 32,
+        "target_modules": [
+          "q_proj",
+          "k_proj",
+          "v_proj",
+          "o_proj",
+          "gate_proj",
+          "up_proj",
+          "down_proj"
+        ],
+        "learning_rate": 0.0002,
+        "epochs": 3.0,
+        "per_device_batch": 16,
+        "grad_accum": 2,
+        "max_seq_len": 256,
+        "completion_only_loss": true,
+        "warmup_ratio": 0.03,
+        "lr_scheduler": "linear",
+        "weight_decay": 0.01,
+        "lora_dropout": 0.0,
+        "seed": 2024
+      },
+      "train_minutes": 4.5,
+      "learning_curve": [
+        {
+          "epoch": 3,
+          "val_macro_f1": 0.933,
+          "val_accuracy": 0.9258,
+          "invalid": 9
+        }
+      ],
+      "best_epoch": 3,
+      "best_val_macro_f1": 0.933,
+      "diminishing_returns_after_epoch": 3,
+      "train_loss_by_epoch": [
+        {
+          "epoch": 1,
+          "train_loss_mean": 0.3841,
+          "train_loss_last": 0.1911
+        }
+      ],
+      "worst_classes_at_best": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.4,
+          "oos"
+        ],
+        [
+          0.4528,
+          "reminder"
+        ],
+        [
+          0.4667,
+          "accept_reservations"
+        ],
+        [
+          0.6939,
+          "restaurant_reservation"
+        ]
+      ]
+    }
+  },
+  "seed_variance": {
+    "seeds": [
+      42,
+      1337,
+      2024
+    ],
+    "n_seeds": 3,
+    "families": {
+      "recipe_a": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9563,
+        "macro_f1_sigma": 0.0015,
+        "per_run": {
+          "clinc_recipe_a_s42": 0.9574,
+          "clinc_recipe_a_s1337": 0.9546,
+          "clinc_recipe_a_s2024": 0.957
+        },
+        "oos_recall_mean": 0.7167,
+        "oos_recall_per_run": {
+          "clinc_recipe_a_s42": 0.72,
+          "clinc_recipe_a_s1337": 0.71,
+          "clinc_recipe_a_s2024": 0.72
+        }
+      },
+      "ablation": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9611,
+        "macro_f1_sigma": 0.0008,
+        "per_run": {
+          "clinc_ablation_s42": 0.9619,
+          "clinc_ablation_s1337": 0.9604,
+          "clinc_ablation_s2024": 0.9609
+        },
+        "oos_recall_mean": 0.6867,
+        "oos_recall_per_run": {
+          "clinc_ablation_s42": 0.71,
+          "clinc_ablation_s1337": 0.66,
+          "clinc_ablation_s2024": 0.69
+        }
+      },
+      "recipe_b": {
+        "epoch": 3,
+        "n": 3,
+        "macro_f1_mean": 0.9317,
+        "macro_f1_sigma": 0.0013,
+        "per_run": {
+          "clinc_recipe_b_s42": 0.9316,
+          "clinc_recipe_b_s1337": 0.9305,
+          "clinc_recipe_b_s2024": 0.933
+        },
+        "oos_recall_mean": 0.2967,
+        "oos_recall_per_run": {
+          "clinc_recipe_b_s42": 0.33,
+          "clinc_recipe_b_s1337": 0.3,
+          "clinc_recipe_b_s2024": 0.26
+        }
+      },
+      "ablation_ctrl6": {
+        "epoch": 3,
+        "n": 1,
+        "macro_f1_mean": 0.9624,
+        "macro_f1_sigma": null,
+        "per_run": {
+          "clinc_ablation_ctrl6_s42": 0.9624
+        },
+        "oos_recall_mean": 0.72,
+        "oos_recall_per_run": {
+          "clinc_ablation_ctrl6_s42": 0.72
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "run": "clinc_ablation_s2024",
+  "mode": "classify",
+  "gold": "data\\clinc\\train\\val_eval.jsonl",
+  "limit": null,
+  "only_epoch": 3,
+  "best_epoch": 3,
+  "epochs": [
+    {
+      "epoch": 3,
+      "checkpoint": "checkpoint-537",
+      "macro_f1": 0.9608635327914077,
+      "accuracy": 0.9593548387096774,
+      "invalid": 0,
+      "worst_classes": [
+        [
+          0.0,
+          "reminder_update"
+        ],
+        [
+          0.6531,
+          "reminder"
+        ],
+        [
+          0.7753,
+          "oos"
+        ],
+        [
+          0.7895,
+          "restaurant_reservation"
+        ],
+        [
+          0.85,
+          "accept_reservations"
+        ]
+      ],
+      "oos": {
+        "recall": 0.69,
+        "precision": 0.8846,
+        "n_gold": 100,
+        "n_pred": 78
+      }
+    }
+  ]
+}
