@@ -8,8 +8,8 @@ result to `data/label/labeled.jsonl` (one JSON object per line). Key properties:
   for. Delete the file (or pass --restart) to relabel from scratch.
 - Gold-gated preview: records K3's predicted `category`, the Bitext `gold`, and a
   `gold_match` flag. The gating (keep rationale only when they agree) happens when
-  building training targets — here we keep everything so mismatches are inspectable.
-- Native trace archived: K3's hidden reasoning is stored (design decision — we pay
+  building training targets - here we keep everything so mismatches are inspectable.
+- Native trace archived: K3's hidden reasoning is stored (design decision - we pay
   for it regardless). See `label/targets.py` for what becomes the student's target.
 - Cost accounting: running token + $ totals, printed as it goes.
 
@@ -36,7 +36,7 @@ BATCH_MAX_TOKENS = 1024  # ~5x observed completion; small OpenRouter hold, no tr
 
 
 def _done_ids(path: Path) -> set[int]:
-    """Ids already labeled without error — safe to skip on resume."""
+    """Ids already labeled without error - safe to skip on resume."""
     if not path.exists():
         return set()
     done = set()
@@ -65,7 +65,7 @@ def label_one(teacher: Teacher, row: pd.Series) -> dict:
             "usage": out["usage"],
             "cost_usd": out["cost_usd"],
         }
-    except Exception as e:  # noqa: BLE001 — never let one bad row kill the batch
+    except Exception as e:  # noqa: BLE001 - never let one bad row kill the batch
         return {"id": int(row.id), "text": row.text, "gold": row.label, "error": repr(e)}
 
 

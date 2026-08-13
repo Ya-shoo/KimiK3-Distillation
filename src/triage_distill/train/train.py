@@ -1,4 +1,4 @@
-"""QLoRA SFT for the M2 student runs — OWNER'S SURFACE.
+"""QLoRA SFT for the M2 student runs - OWNER'S SURFACE.
 
 Trains Qwen3-4B (4-bit + LoRA, via Unsloth) on ONE of the three `messages` files, so
 the only variable across runs is the rationale signal:
@@ -7,15 +7,15 @@ the only variable across runs is the rationale signal:
     uv run --no-sync python -m triage_distill.train.train --data data/train/recipe_b.messages.jsonl --name recipe_b
     uv run --no-sync python -m triage_distill.train.train --data data/train/recipe_a.messages.jsonl --name recipe_a
 
-The hyperparameters in `KNOBS` below are deliberately UNSET — they're the owner's
-decisions (HANDOFF-M2-4090 §3 has the coaching ranges). The script fails fast and
-lists what's missing. Everything around the knobs — data loading, chat-template
-rendering, loss-mask verification peek, checkpointing, run metadata, loss curve —
+The hyperparameters in `KNOBS` below are deliberately UNSET - they're the owner's
+decisions (HANDOFF-M2-4090 Section 3 has the coaching ranges). The script fails fast and
+lists what's missing. Everything around the knobs - data loading, chat-template
+rendering, loss-mask verification peek, checkpointing, run metadata, loss curve -
 is plumbing and already wired.
 
 Start with `--dry-run` (no knobs needed): renders the data through the tokenizer's
-chat template and prints token-length percentiles — that's the input to your
-`max_seq_len` decision — plus one fully-rendered example so you can see exactly
+chat template and prints token-length percentiles - that's the input to your
+`max_seq_len` decision - plus one fully-rendered example so you can see exactly
 what the model trains on (Qwen3 chat template quirks included).
 
 Outputs per run under `runs/<name>/`:
@@ -38,7 +38,7 @@ DEFAULT_BASE = "Qwen/Qwen3-4B"
 
 
 # ── OWNER KNOBS ──────────────────────────────────────────────────────────────
-# Coaching ranges (HANDOFF §3), not prescriptions. Unset = the script refuses to
+# Coaching ranges (HANDOFF Section 3), not prescriptions. Unset = the script refuses to
 # train and tells you what's missing. Tune only against VAL macro-F1 (never test).
 @dataclass
 class Knobs:
@@ -48,16 +48,16 @@ class Knobs:
     #   attention only:  ("q_proj", "k_proj", "v_proj", "o_proj")
     #   + MLP:           (..., "gate_proj", "up_proj", "down_proj")
     learning_rate: float | None = None     # 1e-4 – 2e-4
-    epochs: float | None = None            # 1–3 (small data — watch val overfit)
+    epochs: float | None = None            # 1–3 (small data - watch val overfit)
     per_device_batch: int | None = None    # bs × grad_accum = effective batch; size to fill 24 GB
     grad_accum: int | None = None
     max_seq_len: int | None = None         # size to recipe B's ~p95 (see --dry-run stats)
 
-    # Plan of record (HANDOFF §3): completion-only loss — learn from the assistant
+    # Plan of record (HANDOFF Section 3): completion-only loss - learn from the assistant
     # JSON, not from re-predicting the prompt. Flip to False only to see why it matters.
     completion_only_loss: bool = True
 
-    # Plumbing defaults — override if you have an opinion, ignore otherwise.
+    # Plumbing defaults - override if you have an opinion, ignore otherwise.
     warmup_ratio: float = 0.03
     lr_scheduler: str = "linear"
     weight_decay: float = 0.01
@@ -66,7 +66,7 @@ class Knobs:
 
 
 KNOBS = Knobs(
-    # Owner-set 2026-07-28. One config for all three runs — the recipe is the only
+    # Owner-set 2026-07-28. One config for all three runs - the recipe is the only
     # variable. epochs=3 + per-epoch checkpoints: best epoch is selected on VAL via
     # eval.epoch_sweep, so the epoch count is a measurement, not a guess.
     lora_r=16,
@@ -116,18 +116,18 @@ def _render(tokenizer, rows: list[dict]) -> list[str]:
 
 
 def _peek_mask(trainer, tokenizer) -> None:
-    """Show what the loss actually sees for example 0 — verify the mask boundary."""
+    """Show what the loss actually sees for example 0 - verify the mask boundary."""
     try:
         ex = trainer.train_dataset[0]
         ids, labels = ex["input_ids"], ex.get("labels")
         if labels is None:
-            print("[peek] no `labels` on the dataset yet (collator-time masking) — skipping")
+            print("[peek] no `labels` on the dataset yet (collator-time masking) - skipping")
             return
         kept = [i for i, l in zip(ids, labels) if l != -100]
         print("\n[peek] tokens contributing to the loss (example 0):")
         print(repr(tokenizer.decode(kept)))
         print(f"[peek] {len(kept)}/{len(ids)} tokens unmasked\n")
-    except Exception as e:  # peek is diagnostics only — never kill a run over it
+    except Exception as e:  # peek is diagnostics only - never kill a run over it
         print(f"[peek] skipped ({e})")
 
 
@@ -149,10 +149,10 @@ def main() -> None:
     ap.add_argument("--stage", type=int, default=None,
                     help="train up to epoch N this process, resuming from the last checkpoint. "
                          "Workaround for a per-step VRAM creep in the Windows stack that "
-                         "livelocks runs longer than ~350 steps — one process per epoch stays "
+                         "livelocks runs longer than ~350 steps - one process per epoch stays "
                          "under the wall. The LR schedule is built for the FULL run and a "
                          "callback halts at the stage boundary, so staged == unstaged training "
-                         "(the Bitext recipe_a run predates this and sawtoothed — see findings).")
+                         "(the Bitext recipe_a run predates this and sawtoothed - see findings).")
     args = ap.parse_args()
 
     data_path = (REPO_ROOT / args.data) if not Path(args.data).is_absolute() else Path(args.data)
@@ -182,7 +182,7 @@ def main() -> None:
         raise SystemExit(
             "KNOBS not set: " + ", ".join(missing)
             + f"\nEdit the KNOBS block in {Path(__file__).relative_to(REPO_ROOT)} "
-              "(coaching ranges are in the comments / HANDOFF-M2-4090 §3). "
+              "(coaching ranges are in the comments / HANDOFF-M2-4090 Section 3). "
               "Run with --dry-run first for the max_seq_len token-length stats."
         )
 
@@ -278,7 +278,7 @@ def main() -> None:
     mins = (time.time() - t0) / 60
 
     if not final_stage:
-        print(f"\nStage {stage}/{KNOBS.epochs} done in {mins:.1f} min — "
+        print(f"\nStage {stage}/{KNOBS.epochs} done in {mins:.1f} min - "
               f"checkpoint saved; run --stage {stage + 1} to continue")
         return
 
@@ -314,7 +314,7 @@ def main() -> None:
     except Exception as e:
         print(f"[chart] skipped ({e})")
 
-    print(f"\nDone in {mins:.1f} min — adapter at {adapter_dir.relative_to(REPO_ROOT)}")
+    print(f"\nDone in {mins:.1f} min - adapter at {adapter_dir.relative_to(REPO_ROOT)}")
     print("Next: uv run --no-sync python -m triage_distill.eval.infer "
           f"--adapter {adapter_dir.relative_to(REPO_ROOT)} --mode <classify|reason> "
           f"--out runs/{args.name}/preds.jsonl")

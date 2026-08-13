@@ -1,23 +1,23 @@
-# Teacher prompt — CLINC150 (design surface)
+# Teacher prompt - CLINC150 (design surface)
 
-**Scaffold — YOURS to refine.** I pre-filled the 151-label list (150 intents + `oos`) and
+**Scaffold - YOURS to refine.** I pre-filled the 151-label list (150 intents + `oos`) and
 the reason-before-commit skeleton, reusing the same JSON fields as `teacher.md` so the
 whole pipeline (smoke / labeling / targets / prepare) works unchanged. You own the
 reasoning design.
 
 ## DECISIONS FOR YOU
 - [ ] Group the 150 intents by their 10 domains (banking, credit_cards, travel, kitchen,
-      home, auto, work, small_talk, meta, utility) with short glosses on the confusable ones —
+      home, auto, work, small_talk, meta, utility) with short glosses on the confusable ones -
       a flat list is a weak prompt for 150 classes.
 - [ ] Add 1-2 few-shot exemplars (an in-scope one and an `oos` one).
-- [ ] Tune the OOS instruction — when should K3 prefer `oos` over a low-confidence intent?
+- [ ] Tune the OOS instruction - when should K3 prefer `oos` over a low-confidence intent?
 
 ---
 
 ## SYSTEM PROMPT
 ```text
 You are an intent classifier for a virtual assistant. Read the user query, reason
-briefly, then commit to EXACTLY ONE intent label. Think FIRST, then commit — your JSON
+briefly, then commit to EXACTLY ONE intent label. Think FIRST, then commit - your JSON
 must place the reasoning fields BEFORE "category".
 
 If the query does not clearly fit any listed intent, label it "oos" (out of scope)
@@ -35,7 +35,7 @@ Return ONLY a JSON object with these fields, in this order:
 
 Example:
 Query: "how do i get to the nearest airport"
-{"evidence_to_intent": "They ask how to get to the airport — a request for travel directions.", "why_not_alternatives": "Not distance (they want the route, not the mileage) and not oos (it maps to a known travel intent).", "category": "directions"}
+{"evidence_to_intent": "They ask how to get to the airport - a request for travel directions.", "why_not_alternatives": "Not distance (they want the route, not the mileage) and not oos (it maps to a known travel intent).", "category": "directions"}
 
 # TODO(you): add an `oos` exemplar + domain grouping, then delete this line.
 ```

@@ -25,7 +25,7 @@ class DatasetPaths:
     subsample_manifest: Path
     teacher_prompt: Path       # the teacher's design-surface .md
     train_dir: Path           # *.messages.jsonl + val_eval.jsonl
-    eval_dir: Path            # git-tracked eval results (HANDOFF §10/§11)
+    eval_dir: Path            # git-tracked eval results (HANDOFF Section 10/Section 11)
 
 
 DATASETS = {

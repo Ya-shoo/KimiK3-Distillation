@@ -1,9 +1,9 @@
-"""Frontier-panel eval — label-only inference over a benchmark's TEST split.
+"""Frontier-panel eval - label-only inference over a benchmark's TEST split.
 
 This is the M3 counterpart to the 4090's student eval: it measures how the
 finalized frontier/efficient panel (`configs/models.yaml`) classifies each
 benchmark's held-out test tickets, so the paper can put the distilled student
-on the same axes (macro-F1 + cost). Plumbing only — the numbers are the models'.
+on the same axes (macro-F1 + cost). Plumbing only - the numbers are the models'.
 
 Scope: the OpenRouter-metered panel entries (provider `openrouter`). The two
 Anthropic entries (`claude-code-cli`, free via the Claude Code sub) run through a
@@ -58,7 +58,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 # Per-dataset task framing for the label-only prompt. The label list + confusable
 # guidance are lifted verbatim from the teacher prompt (single source of truth for
-# label semantics — zero transcription risk), so only the framing differs here.
+# label semantics - zero transcription risk), so only the framing differs here.
 TASK_LINE = {
     "bitext": (
         "You are an expert customer-support ticket triager. Read the ticket and "
@@ -94,7 +94,7 @@ def build_label_only_prompt(dataset: str) -> str:
 def parse_category(raw: str, labels: set[str]) -> str | None:
     """Extract a valid `category` from a model's raw text; None if unparseable/out-of-space.
 
-    Handles bare JSON, markdown-fenced JSON (```json … ``` — Anthropic models do this even
+    Handles bare JSON, markdown-fenced JSON (```json … ``` - Anthropic models do this even
     under response_format), and prose with an embedded object. A returned-but-invalid label
     yields None (scored WRONG), never a crash.
     """
@@ -134,7 +134,7 @@ class PanelClient:
     _REASONING = {
         "off": {"enabled": False},      # cheapest + strict label-only (skip thinking where supported)
         "low": {"effort": "low"},       # minimal thinking budget
-        "default": None,                # provider default (may reason a lot — costly)
+        "default": None,                # provider default (may reason a lot - costly)
     }
 
     def __init__(self, model: str, price_key: str, *, dataset: str, reasoning: str = "off",
@@ -245,11 +245,11 @@ def _clean_cli_env() -> dict:
 
 
 class ClaudeCliClient:
-    """A Claude model via the Claude Code CLI (`claude -p`) — free via the user's sub, no API key.
+    """A Claude model via the Claude Code CLI (`claude -p`) - free via the user's sub, no API key.
 
     Same `.predict(text)` shape as `PanelClient`. Runs each ticket in a fresh headless
     session with the default agent prompt REPLACED by our label-only prompt
-    (`--system-prompt` + `--exclude-dynamic-system-prompt-sections`), no MCP, no tools —
+    (`--system-prompt` + `--exclude-dynamic-system-prompt-sections`), no MCP, no tools -
     so the Anthropic entries see the SAME task framing as the OpenRouter panel. The CLI's
     reported `total_cost_usd` is the Anthropic API-list-equivalent of that call, so it
     doubles as the cost-axis figure (prices.yaml has no Fable list price).
@@ -283,7 +283,7 @@ class ClaudeCliClient:
         cost = 0.0
         for attempt in range(max_retries + 1):
             argv = self._argv(text)
-            if attempt:  # firmer nudge on retry (stateless CLI — can't continue the turn)
+            if attempt:  # firmer nudge on retry (stateless CLI - can't continue the turn)
                 argv[2] += '\n\nReturn ONLY the JSON object, e.g. {"category": "track_order"}.'
             proc = subprocess.run(argv, capture_output=True, text=True, timeout=self.timeout_s,
                                    env=self.env)
@@ -326,7 +326,7 @@ def make_client(entry: dict, *, dataset: str, reasoning: str, max_tokens: int):
 # --------------------------------------------------------------------------- run
 
 def _resolved_ids(path: Path) -> set[int]:
-    """Ids already resolved (a pred was produced — valid or measured-invalid); safe to skip.
+    """Ids already resolved (a pred was produced - valid or measured-invalid); safe to skip.
 
     Transport-error records ({"error": ...}) are NOT resolved, so they re-run on resume.
     """
@@ -347,7 +347,7 @@ def _predict_one(client: PanelClient, row: dict) -> dict:
         out = client.predict(row["text"])
         return {"id": int(row["id"]), "pred": out["pred"], "invalid": out["invalid"],
                 "usage": out["usage"], "cost_usd": out["cost_usd"], "cost_or": out["cost_or"]}
-    except Exception as e:  # noqa: BLE001 — transport/API error: record so resume retries it
+    except Exception as e:  # noqa: BLE001 - transport/API error: record so resume retries it
         return {"id": int(row["id"]), "error": repr(e)}
 
 
@@ -423,7 +423,7 @@ def _summarize(model_key: str, entry: dict, gold_rows: list[dict], preds_path: P
     errs = sum(1 for r in recs if "error" in r)
     # Score each model on exactly the test rows it PREDICTED (its ids ∩ gold), not the full
     # gold set. For the full-test models this is the whole test split (no change); for a
-    # subsample entry (e.g. Fable on a fixed 2k sample) it scores only those rows — a
+    # subsample entry (e.g. Fable on a fixed 2k sample) it scores only those rows - a
     # never-attempted row must not count as a wrong answer. Returned-but-invalid preds
     # (pred=null) stay in `preds`, so they still score as wrong.
     gold_sub = {i: gold[i] for i in preds if i in gold}
@@ -509,7 +509,7 @@ def main() -> None:
                   workers=args.workers, limit=args.limit, restart=args.restart)
 
     # Leaderboard + combined summary are rebuilt from EVERY model with preds on disk (the
-    # full panel, not just what ran this invocation) — so a partial run (e.g. only the
+    # full panel, not just what ran this invocation) - so a partial run (e.g. only the
     # claude-cli entries) refreshes rather than clobbers panel_summary.json.
     summaries = [_summarize(k, e, gold_rows, out_dir / f"{k}.preds.jsonl", args.dataset)
                  for k, e in full.items() if (out_dir / f"{k}.preds.jsonl").exists()]

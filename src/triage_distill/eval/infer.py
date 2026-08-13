@@ -1,17 +1,17 @@
 """Inference runner: trained adapter -> preds.jsonl for the scorer. Pure plumbing.
 
 Runs every ticket in an eval file (default `data/train/val_eval.jsonl`) through the
-student with SCHEMA-GUARANTEED OUTPUT (HANDOFF §7: the scorer counts invalid output
+student with SCHEMA-GUARANTEED OUTPUT (HANDOFF Section 7: the scorer counts invalid output
 as wrong, so this isn't optional). classify mode decodes fully constrained (the enum
 constraint is cheap); reason mode generates free-form first and constrained-re-decodes
-only the rows that fail schema validation — LMFE's per-token constraint is ~100x
+only the rows that fail schema validation - LMFE's per-token constraint is ~100x
 slower inside free-text rationale fields, and the trained model virtually never
 needs the net. Either way `category` ends up in the frozen 27-label enum or null.
 
 The system prompt is imported from `train.prepare` (SYS_CLASSIFY / SYS_REASON), so
 training and inference can never drift apart.
 
-    # ablation / recipe A (label-only at inference — the fast path):
+    # ablation / recipe A (label-only at inference - the fast path):
     uv run --no-sync python -m triage_distill.eval.infer --adapter runs/ablation/adapter --mode classify --out runs/ablation/preds.jsonl
     # recipe B (reason-then-label):
     uv run --no-sync python -m triage_distill.eval.infer --adapter runs/recipe_b/adapter --mode reason --out runs/recipe_b/preds.jsonl
@@ -47,7 +47,7 @@ def _schema(mode: str, labels: list[str]) -> dict:
     if mode == "classify":
         return {"type": "object", "properties": {"category": enum},
                 "required": ["category"], "additionalProperties": False}
-    return {  # reason: same field order the student was trained on — reasoning first
+    return {  # reason: same field order the student was trained on - reasoning first
         "type": "object",
         "properties": {
             "evidence_to_intent": {"type": "string"},
@@ -85,7 +85,7 @@ def main() -> None:
     from unsloth import FastLanguageModel
 
     # lm-format-enforcer 0.11.x imports PreTrainedTokenizerBase from a module path
-    # that transformers 5.x removed — restore the alias before importing the integration.
+    # that transformers 5.x removed - restore the alias before importing the integration.
     import transformers
     import transformers.tokenization_utils as _tu
     if not hasattr(_tu, "PreTrainedTokenizerBase"):
@@ -116,7 +116,7 @@ def main() -> None:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f'Ticket: "{text}"'},  # must match prepare._msg
         ]
-        try:  # Qwen3: suppress native thinking — the JSON is the whole contract
+        try:  # Qwen3: suppress native thinking - the JSON is the whole contract
             return tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True, enable_thinking=False)
         except TypeError:  # tokenizer without the kwarg (other student families)
@@ -148,8 +148,8 @@ def main() -> None:
 
     # Speed vs guarantee: LMFE's per-token constraint is cheap for the classify enum
     # but ~100x slower inside free-text rationale fields (nearly the whole vocab is
-    # legal each step). So reason mode generates UNCONSTRAINED first — the format is
-    # burned in by training — and only rows failing schema validation are re-decoded
+    # legal each step). So reason mode generates UNCONSTRAINED first - the format is
+    # burned in by training - and only rows failing schema validation are re-decoded
     # under the full constraint. Net guarantee is unchanged: every pred is in-enum,
     # or null and counted wrong by the scorer.
     constrain_first_pass = args.mode == "classify"
@@ -170,7 +170,7 @@ def main() -> None:
               end="", flush=True)
 
     if retry:
-        print(f"\n{len(retry)} rows failed schema validation — re-decoding constrained")
+        print(f"\n{len(retry)} rows failed schema validation - re-decoding constrained")
         for start in range(0, len(retry), 4):  # small batches: constrained is slow
             batch = retry[start : start + 4]
             for r, raw in zip(batch, generate(batch, constrained=True)):

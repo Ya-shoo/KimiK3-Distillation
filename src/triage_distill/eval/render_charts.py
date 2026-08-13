@@ -48,11 +48,11 @@ PANEL = {
 }
 
 STUDENT_TEST = {  # (bitext, clinc) test macro-F1 x100, from findings.json test_eval
-    "Student — recipe A": (BIT["test_eval"]["recipes"]["recipe_a"]["test_macro_f1"] * 100,
+    "Student - recipe A": (BIT["test_eval"]["recipes"]["recipe_a"]["test_macro_f1"] * 100,
                            CLI["test_eval"]["recipes"]["recipe_a"]["test_macro_f1"] * 100),
-    "Student — ablation": (BIT["test_eval"]["recipes"]["ablation"]["test_macro_f1"] * 100,
+    "Student - ablation": (BIT["test_eval"]["recipes"]["ablation"]["test_macro_f1"] * 100,
                            CLI["test_eval"]["recipes"]["ablation"]["test_macro_f1"] * 100),
-    "Student — recipe B": (BIT["test_eval"]["recipes"]["recipe_b"]["test_macro_f1"] * 100,
+    "Student - recipe B": (BIT["test_eval"]["recipes"]["recipe_b"]["test_macro_f1"] * 100,
                            CLI["test_eval"]["recipes"]["recipe_b"]["test_macro_f1"] * 100),
 }
 PANEL_ROWS = {  # label -> (bitext F1x100, clinc F1x100, $/1k mean of the two runs)
@@ -63,8 +63,8 @@ for ds_i, ds in enumerate(("bitext", "clinc")):
         PANEL_ROWS[m["label"]][ds_i] = m["macro_f1"] * 100
         PANEL_ROWS[m["label"]][2] = (PANEL_ROWS[m["label"]][2] or 0) + m["cost_per_1k_tickets_list"] / 2
 
-# Student serving cost: plotted at the HOSTED-API CEILING ($0.03/1k) — the
-# conservative end of the honest $0.002-$0.03 range (PAPER.md §8) — so the chart
+# Student serving cost: plotted at the HOSTED-API CEILING ($0.03/1k) - the
+# conservative end of the honest $0.002-$0.03 range (PAPER.md Section 8) - so the chart
 # never flatters the specialist.
 STUDENT_COST = 0.03
 COST_NOTE = (r"Student plotted at its hosted-API cost ceiling (\$0.03/1k); owned-GPU "
@@ -75,7 +75,7 @@ def render(dark: bool) -> None:
     sfx = "_dark" if dark else ""
     cats = CAT_DARK if dark else CAT_LIGHT
 
-    # 1 — money chart (hero): best student per benchmark + full panel.
+    # 1 - money chart (hero): best student per benchmark + full panel.
     # One shared display name for the student point so the hero highlight
     # matches in both panels (recipe A on Bitext, ablation on CLINC).
     money = {}
@@ -87,26 +87,26 @@ def render(dark: bool) -> None:
         money[bench] = rows
     money_chart(
         money, hero="Student (Qwen3-4B, local)",
-        title="Accuracy vs. cost — the specialist owns the cheap corner",
+        title="Accuracy vs. cost - the specialist owns the cheap corner",
         subtitle="Held-out test, scored once · best student recipe per benchmark (recipe A on Bitext, ablation on CLINC)",
         dark=dark, note=COST_NOTE, out=OUT / f"money_chart{sfx}",
     )
 
-    # 2 — panel leaderboard: all 8 systems, both benchmarks
+    # 2 - panel leaderboard: all 8 systems, both benchmarks
     panels = {}
     for ds_i, bench in ((0, "Bitext-27 · macro-F1 (test)"), (1, "CLINC-151 · macro-F1 (test)")):
         rows = [(lbl, v[ds_i]) for lbl, v in STUDENT_TEST.items()]
         rows += [(lbl, v[ds_i]) for lbl, v in PANEL_ROWS.items()]
         panels[bench] = rows
     panel_leaderboard(
-        panels, hero="Student — recipe A", teacher="Kimi K3 (teacher)",
+        panels, hero="Student - recipe A", teacher="Kimi K3 (teacher)",
         title="The frontier panel vs. the distilled students",
         subtitle="Held-out test, one scored pass per system, shared scorer · students in blue",
-        dark=dark, note="Teacher in bold. Gate: ≥97.5% of teacher — recipe B fails it on CLINC (96.1%).",
+        dark=dark, note="Teacher in bold. Gate: ≥97.5% of teacher - recipe B fails it on CLINC (96.1%).",
         out=OUT / f"panel_leaderboard{sfx}",
     )
 
-    # 3 — model bars: the controlled ablation, val mean ± seed σ
+    # 3 - model bars: the controlled ablation, val mean ± seed σ
     sv_b = BIT["seed_variance"]["families"]
     model_bars(
         models=["Ablation", "Recipe A", "Recipe B"],
@@ -132,7 +132,7 @@ def render(dark: bool) -> None:
         dark=dark, out=OUT / f"model_bars_clinc{sfx}",
     )
 
-    # 4 — learning curves (NEW, spec'd in Part C): val macro-F1 vs epoch
+    # 4 - learning curves (NEW, spec'd in Part C): val macro-F1 vs epoch
     p = _p(dark)
     _apply_rc(dark)
     fig, axes = plt.subplots(1, 2, figsize=(12.4, 4.9), dpi=200)
@@ -177,13 +177,13 @@ def render(dark: bool) -> None:
             ax.spines[s].set_color(p["axis"])
         ax.tick_params(length=0)
     fig.subplots_adjust(top=0.78, wspace=0.24, bottom=0.14)
-    _titles(fig, "Learning curves — the knee is at epoch 2 (Bitext) / 3 (CLINC)",
+    _titles(fig, "Learning curves - the knee is at epoch 2 (Bitext) / 3 (CLINC)",
             "Large dot = best epoch (val selection) · the 6-epoch control shows CLINC flattens after 3",
             "Bitext recipe A curve is the corrected fixed-schedule re-run (s42v2).", p,
             title_y=0.965, sub_y=0.885)
     _save(fig, OUT / f"learning_curves{sfx}")
 
-    # 5 — savings at scale (NEW, spec'd in Part C): $/1M tickets/month
+    # 5 - savings at scale (NEW, spec'd in Part C): $/1M tickets/month
     _apply_rc(dark)
     rows = [("Kimi K3 (teacher)", 2200, None), ("Haiku 4.5", 790, None),
             ("Gemini 3 Flash", 390, None), ("GPT-5.6 Luna", 350, None),
@@ -212,7 +212,7 @@ def render(dark: bool) -> None:
         s.set_visible(False)
     ax.tick_params(length=0)
     fig.subplots_adjust(top=0.80, left=0.2, bottom=0.15)
-    _titles(fig, "Savings at scale — 1M tickets a month",
+    _titles(fig, "Savings at scale - 1M tickets a month",
             "Same job, same test set: the student outscores every model below the teacher's price", None, p,
             title_y=0.96, sub_y=0.87)
     _save(fig, OUT / f"savings_at_scale{sfx}")

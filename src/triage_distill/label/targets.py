@@ -2,17 +2,17 @@
 
 Gold-gating (the quality filter): keep a row only when K3's predicted `category`
 matched the Bitext `gold`. When they disagree, K3's reasoning went somewhere the
-gold label says is wrong, so its rationale is untrustworthy as a teaching signal —
+gold label says is wrong, so its rationale is untrustworthy as a teaching signal -
 we drop it. The kept rows use the **gold** label as the student's `category` target.
 
 Three format-agnostic intermediate files (input + structured target). The training
-step (M2) renders these into the model's chat template — kept separate so the
+step (M2) renders these into the model's chat template - kept separate so the
 training-config design stays the user's surface, not baked in here.
 
-- recipe_a.jsonl  (multi-task; label-only at inference — SPEED): 2 rows per ticket
+- recipe_a.jsonl  (multi-task; label-only at inference - SPEED): 2 rows per ticket
     {task: classify, input, target: {category}}
     {task: explain,  input, target: {evidence_to_intent, why_not_alternatives}}
-- recipe_b.jsonl  (single sequence; reason-then-label — INTERPRETABLE): 1 row per ticket
+- recipe_b.jsonl  (single sequence; reason-then-label - INTERPRETABLE): 1 row per ticket
     {input, target: {evidence_to_intent, why_not_alternatives, category}}
 - ablation.jsonl  (control; label only): {input, target: {category}}
 
@@ -75,7 +75,7 @@ def main() -> None:
     _write(OUT_DIR / "recipe_b.jsonl", recipe_b)
     _write(OUT_DIR / "ablation.jsonl", ablation)
 
-    # Drop diagnostics — where does K3 disagree with Bitext gold? (methodology signal)
+    # Drop diagnostics - where does K3 disagree with Bitext gold? (methodology signal)
     drop_by_gold = Counter(r["gold"] for r in dropped)
     confusions = Counter((r["gold"], r["pred"]) for r in dropped)
     report = {

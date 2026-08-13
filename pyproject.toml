@@ -36,7 +36,7 @@ dev = [
     "pytest>=8",
 ]
 
-# CUDA torch on the 4090 box only — macOS keeps resolving torch from PyPI.
+# CUDA torch on the 4090 box only - macOS keeps resolving torch from PyPI.
 # (PyPI's Windows torch wheel is CPU-only; driver 596.49 => CUDA 13 index.)
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]

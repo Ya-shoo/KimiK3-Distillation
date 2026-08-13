@@ -2,13 +2,13 @@
 
 Two styled, data-driven figures, rendered from the same numbers `score.py` produces.
 Colors + marks follow a house style (validated slot-1 blue accent, the fixed
-categorical hue order, neutral inks, thin recessive gridlines). This is PLUMBING —
+categorical hue order, neutral inks, thin recessive gridlines). This is PLUMBING -
 the numbers are yours (from M2/M3 eval); this only renders them.
 
-- `model_bars()`      — vertical bars comparing models on one metric, with **error
+- `model_bars()` - vertical bars comparing models on one metric, with **error
   bars** (± across seeds / bootstrap CI). The "did A/B beat the ablation by more than
   noise?" view. (Reference style: grouped color bars with caps + value labels.)
-- `panel_leaderboard()` — small-multiple horizontal ranked bars, one panel per eval
+- `panel_leaderboard()` - small-multiple horizontal ranked bars, one panel per eval
   slice, our student highlighted. The "where does the tiny specialist land?" view.
 
     uv run python -m triage_distill.eval.charts --out <dir>          # PLACEHOLDER demo (light)
@@ -30,7 +30,7 @@ LIGHT = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781",
              grid="#e1e0d9", axis="#c3c2b7", track="#ececea", bar="#c9c8c2", accent="#2a78d6")
 DARK = dict(surface="#1a1a19", ink="#ffffff", ink2="#c3c2b7", muted="#898781",
             grid="#2c2c2a", axis="#383835", track="#242422", bar="#4a4a47", accent="#3987e5")
-# categorical slots in the fixed, CVD-validated order — never cycled past what's defined.
+# categorical slots in the fixed, CVD-validated order - never cycled past what's defined.
 CAT_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
 CAT_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"]
 
@@ -115,7 +115,7 @@ def panel_leaderboard(panels, hero, *, teacher=None, title, subtitle="", scale_m
                       dark=False, note=None, ncols=2, out=None):
     """Small-multiple ranked horizontal bars; `hero` model highlighted in every panel.
 
-    panels: {panel_title: [(model, value), ...]}  — each panel sorted descending here.
+    panels: {panel_title: [(model, value), ...]} - each panel sorted descending here.
     """
     p = _p(dark); _apply_rc(dark)
     items = list(panels.items())
@@ -161,7 +161,7 @@ def money_chart(benchmarks, hero, *, title, subtitle="",
                 dark=False, note=None, ncols=2, out=None):
     """The hero image: cost (log x) vs macro-F1 (y), one panel per benchmark, hero highlighted.
 
-    benchmarks: {name: [(model, cost_per_1k, macro_f1[, label_dy]), ...]} — the optional
+    benchmarks: {name: [(model, cost_per_1k, macro_f1[, label_dy]), ...]} - the optional
     4th element nudges that row's label vertically (in points) to dodge collisions.
     The student sits high-and-left (accurate + ~free); flagships high-and-right
     (accurate + expensive); efficient tier between.
@@ -206,10 +206,10 @@ def money_chart(benchmarks, hero, *, title, subtitle="",
 
 # --------------------------------------------------------------------------- demo
 def _demo(out_dir: Path, dark: bool) -> None:
-    note = "ILLUSTRATIVE — placeholder numbers, NOT measured results (M2/M3 not run yet)."
+    note = "ILLUSTRATIVE - placeholder numbers, NOT measured results (M2/M3 not run yet)."
     suffix = "_dark" if dark else ""
 
-    # image-2 style: the internal controlled experiment — A vs B vs ablation (all local, free)
+    # image-2 style: the internal controlled experiment - A vs B vs ablation (all local, free)
     model_bars(
         models=["Ablation", "Recipe B", "Recipe A"],
         values=[86.4, 89.3, 89.9],
@@ -223,32 +223,32 @@ def _demo(out_dir: Path, dark: bool) -> None:
     # image-1 style: the finalized 7-model panel + all three students, per benchmark; Recipe A hero
     P = ["Kimi K3 (teacher)", "GPT-5.6 Sol", "Gemini 3 Flash", "Fable 5",
          "Haiku 4.5", "GPT-5.6 Luna", "DeepSeek 3.2",
-         "Student — Recipe A", "Student — Recipe B", "Student — ablation"]
+         "Student - Recipe A", "Student - Recipe B", "Student - ablation"]
     panel = {
         "Bitext-27 · macro-F1 (test)": list(zip(P, [91.0, 90.4, 88.2, 89.6, 87.5, 87.0, 85.8, 89.9, 89.3, 86.4])),
         "CLINC-151 · macro-F1 (test)": list(zip(P, [88.0, 87.1, 84.0, 86.2, 85.0, 84.5, 82.5, 85.9, 85.4, 81.0])),
     }
     panel_leaderboard(
-        panel, hero="Student — Recipe A", teacher="Kimi K3 (teacher)",
+        panel, hero="Student - Recipe A", teacher="Kimi K3 (teacher)",
         title="The panel vs. our distilled student",
         subtitle="Two tiers (flagship + efficient) vs. a fine-tuned 4B specialist · macro-F1",
         scale_max=100.0, dark=dark, note=note, out=out_dir / f"panel_leaderboard{suffix}",
     )
 
-    # the hero image: cost vs accuracy — student high-and-left, flagships high-and-right
+    # the hero image: cost vs accuracy - student high-and-left, flagships high-and-right
     money = {
-        "Bitext-27": [("Student — Recipe A", 0.02, 89.9), ("DeepSeek 3.2", 0.28, 85.8),
+        "Bitext-27": [("Student - Recipe A", 0.02, 89.9), ("DeepSeek 3.2", 0.28, 85.8),
                       ("GPT-5.6 Luna", 0.55, 87.0), ("Gemini 3 Flash", 0.62, 88.2),
                       ("Haiku 4.5", 1.08, 87.5), ("Kimi K3 (teacher)", 3.23, 91.0),
                       ("GPT-5.6 Sol", 5.45, 90.4), ("Fable 5", 15.0, 89.6)],
-        "CLINC-151": [("Student — Recipe A", 0.02, 85.9), ("DeepSeek 3.2", 0.28, 82.5),
+        "CLINC-151": [("Student - Recipe A", 0.02, 85.9), ("DeepSeek 3.2", 0.28, 82.5),
                       ("GPT-5.6 Luna", 0.55, 84.5), ("Gemini 3 Flash", 0.62, 84.0),
                       ("Haiku 4.5", 1.08, 85.0), ("Kimi K3 (teacher)", 3.23, 88.0),
                       ("GPT-5.6 Sol", 5.45, 87.1), ("Fable 5", 15.0, 86.2)],
     }
     money_chart(
-        money, hero="Student — Recipe A",
-        title="Accuracy vs. cost — the specialist owns the cheap corner",
+        money, hero="Student - Recipe A",
+        title="Accuracy vs. cost - the specialist owns the cheap corner",
         subtitle="Cost per 1k tickets (list API prices) vs. macro-F1 · student runs at ~$0",
         dark=dark, note=note, out=out_dir / f"money_chart{suffix}",
     )

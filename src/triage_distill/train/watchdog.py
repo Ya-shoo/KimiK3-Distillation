@@ -2,7 +2,7 @@
 
 The box bluescreened twice on 2026-07-29 (bugcheck 0x139, both times under GPU
 load), killing the driver mid-matrix. This watchdog: relaunches the driver whenever
-it isn't running, holds the machine awake (SetThreadExecutionState — process-scoped,
+it isn't running, holds the machine awake (SetThreadExecutionState - process-scoped,
 auto-reverts), and appends GPU temp/power telemetry to runs/gpu_telemetry.csv every
 tick so the next crash leaves a trace. It's registered under HKCU\\...\\Run (via
 matrix bring-up) so a post-crash logon auto-resumes the work, and it deregisters
@@ -115,10 +115,10 @@ def main() -> None:
     try:
         others = _procs_with("triage_distill.train.watchdog")
     except Exception as e:  # logon-storm psutil hiccup: assume alone rather than die silently
-        wlog(f"guard check failed ({e!r}) — assuming no other watchdog")
+        wlog(f"guard check failed ({e!r}) - assuming no other watchdog")
         others = 0
     if others > 0:
-        wlog("another watchdog is running — exiting")
+        wlog("another watchdog is running - exiting")
         return
     ctypes.windll.kernel32.SetThreadExecutionState(ES_KEEP_AWAKE)
     state = json.loads(STATE.read_text()) if STATE.exists() else {"relaunches": 0}
@@ -127,21 +127,21 @@ def main() -> None:
     try:
         while True:
             if DONE.exists():
-                wlog("matrix.done present — deregistering, exiting")
+                wlog("matrix.done present - deregistering, exiting")
                 _deregister()
                 return
             if _procs_with("triage_distill.train.matrix") == 0:
                 if state["relaunches"] >= MAX_RELAUNCH:
-                    wlog(f"driver down but {MAX_RELAUNCH} relaunches spent — giving up")
+                    wlog(f"driver down but {MAX_RELAUNCH} relaunches spent - giving up")
                     _deregister()
                     return
                 state["relaunches"] += 1
                 STATE.write_text(json.dumps(state))
-                wlog(f"driver not running — relaunch #{state['relaunches']}")
+                wlog(f"driver not running - relaunch #{state['relaunches']}")
                 _launch_matrix()
                 time.sleep(90)  # let it get past imports before re-checking
             elif state["relaunches"]:
-                # driver survived past a full tick — only fast-fail loops should
+                # driver survived past a full tick - only fast-fail loops should
                 # accumulate toward the cap, not recoveries from machine crashes
                 state = {"relaunches": 0}
                 STATE.write_text(json.dumps(state))
@@ -161,7 +161,7 @@ def main() -> None:
 if __name__ == "__main__" and sys.platform == "win32":
     try:
         main()
-    except Exception as e:  # pythonw is silent — leave a trace no matter what
+    except Exception as e:  # pythonw is silent - leave a trace no matter what
         try:
             wlog(f"FATAL: {e!r}")
         finally:

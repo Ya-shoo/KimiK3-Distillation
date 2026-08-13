@@ -7,16 +7,16 @@ gold, no teacher) for the eval harness to score each trained student on.
 
 Deliberately model-agnostic: a `messages` list ([{role, content}]) carries no
 tokenizer assumptions, so switching students (Qwen / Llama / Phi) is just applying a
-different chat template on the training box — no re-prep, no re-labeling.
+different chat template on the training box - no re-prep, no re-labeling.
 
     uv run python -m triage_distill.train.prepare
 
 --- YOUR KNOB -------------------------------------------------------------------
-The three system prompts below are the *student's* inference contract (kept lean —
+The three system prompts below are the *student's* inference contract (kept lean -
 the task is baked into the weights, unlike the teacher's 27-gloss prompt). Tune them,
 or say the word and I'll promote them to a `prompts/student.md` design surface like
 `prompts/teacher.md`. Whatever you set here MUST match what the eval harness sends at
-inference — the eval scorer imports these same constants so they stay in lockstep.
+inference - the eval scorer imports these same constants so they stay in lockstep.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from triage_distill.datasets import cfg
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
-# Student inference contract (your knob — keep eval + training in sync via these).
+# Student inference contract (your knob - keep eval + training in sync via these).
 SYS_CLASSIFY = (
     "You are a support-ticket triage classifier. Read the ticket and respond with a "
     'JSON object: {"category": "<intent label>"}.'
@@ -81,7 +81,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     counts = {}
 
-    # Recipe A — multi-task: the task's system prompt selects classify vs explain.
+    # Recipe A - multi-task: the task's system prompt selects classify vs explain.
     a_rows = []
     for r in _load_jsonl(TARGETS / "recipe_a.jsonl"):
         sys = SYS_CLASSIFY if r["task"] == "classify" else SYS_EXPLAIN
@@ -89,18 +89,18 @@ def main() -> None:
     _write(OUT_DIR / "recipe_a.messages.jsonl", a_rows)
     counts["recipe_a"] = len(a_rows)
 
-    # Recipe B — single sequence: reason then label.
+    # Recipe B - single sequence: reason then label.
     b_rows = [_msg(SYS_REASON, r["input"], r["target"]) for r in _load_jsonl(TARGETS / "recipe_b.jsonl")]
     _write(OUT_DIR / "recipe_b.messages.jsonl", b_rows)
     counts["recipe_b"] = len(b_rows)
 
-    # Ablation — label only (control).
+    # Ablation - label only (control).
     ab_rows = [_msg(SYS_CLASSIFY, r["input"], r["target"]) for r in _load_jsonl(TARGETS / "ablation.jsonl")]
     _write(OUT_DIR / "ablation.messages.jsonl", ab_rows)
     counts["ablation"] = len(ab_rows)
 
-    # Eval gold sets — ticket + gold only (the model must produce the category itself).
-    # `id` = 0-based row index of the reset parquet — the ONLY id convention in the repo,
+    # Eval gold sets - ticket + gold only (the model must produce the category itself).
+    # `id` = 0-based row index of the reset parquet - the ONLY id convention in the repo,
     # so student preds (4090) and frontier-panel preds (eval.panel) align by identical ids.
     def _gold(parquet: Path) -> list[dict]:
         df = pd.read_parquet(parquet).reset_index(drop=True)
@@ -110,7 +110,7 @@ def main() -> None:
     _write(OUT_DIR / "val_eval.jsonl", val_rows)
     counts["val_eval"] = len(val_rows)
 
-    # Test is SACRED — scored exactly once (M3): student on the 4090 + the frontier panel,
+    # Test is SACRED - scored exactly once (M3): student on the 4090 + the frontier panel,
     # both against this same file, so every model is graded on identical ids/gold.
     test_rows = _gold(TEST)
     _write(OUT_DIR / "test_eval.jsonl", test_rows)

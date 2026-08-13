@@ -1,8 +1,8 @@
-"""Kimi K3 teacher client — any OpenAI-compatible host (Together / OpenRouter / Moonshot).
+"""Kimi K3 teacher client - any OpenAI-compatible host (Together / OpenRouter / Moonshot).
 
 Plumbing only: auth, JSON decoding + validation, retry, token/cost accounting.
 The teacher PROMPT (the load-bearing design) lives in `prompts/teacher.md` and is
-passed in verbatim — this module is prompt-agnostic so the prompt can be iterated
+passed in verbatim - this module is prompt-agnostic so the prompt can be iterated
 freely without touching code. Only `category` is validated (against the frozen
 27-label space); the rationale field names are whatever the prompt defines.
 """
@@ -52,7 +52,7 @@ def _max_tokens() -> int:
     # Cap the completion budget. K3 is a reasoning model (thinking billed as output),
     # but a one-label classification + 2-sentence rationale needs nowhere near the
     # model's 65_536 ceiling. This matters on OpenRouter, which RESERVES credit for
-    # the full max_tokens up front — leaving it unset reserves ~$0.98/call and blocks
+    # the full max_tokens up front - leaving it unset reserves ~$0.98/call and blocks
     # low-balance accounts outright. Tune down once the smoke test shows real usage.
     return int(os.environ.get("TEACHER_MAX_TOKENS", "4096"))
 

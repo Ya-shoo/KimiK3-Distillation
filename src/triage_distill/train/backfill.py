@@ -1,6 +1,6 @@
 """Back-fill gate-evacuated classes with bare gold-label rows (agent improvement line).
 
-The gold-gate drops rows where the teacher's label disagrees with gold — protecting
+The gold-gate drops rows where the teacher's label disagrees with gold - protecting
 training from contaminated rationales, but also deleting entire confusable classes
 (CLINC `reminder_update`: 40/40 dropped -> student F1 0.0). The gold LABEL of a
 dropped row is still trustworthy (it's the dataset's own answer); only the

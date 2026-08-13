@@ -7,7 +7,7 @@ models:
     input: 3.0
     output: 15.0
     cached_input: 0.30          # 90% off cache-hit input (our static system prompt caches well)
-    note: "Reasoning model — internal thinking tokens are billed as OUTPUT ($15/M)."
+    note: "Reasoning model - internal thinking tokens are billed as OUTPUT ($15/M)."
   anthropic-fable-5:
     provider: openrouter        # OpenRouter live price (2026-07-30); priciest model in the panel
     input: 10.0
@@ -42,7 +42,7 @@ student-local:
   input: 0.0
   output: 0.0
   note: >-
-    QLoRA on owned GPU. Token prices are 0 but serving is NOT free — measured
+    QLoRA on owned GPU. Token prices are 0 but serving is NOT free - measured
     honest range (PAPER.md #8): ~$2-3/1M tickets electricity (19.8 GPU-h @
     ~400W wall, $0.30/kWh, 14 tickets/s measured on the test pass); ~$7-14/1M
     renting a 4090-class GPU ($0.35-0.70/hr); <=$25/1M hosted-API ceiling

@@ -1,16 +1,16 @@
 """Build the CLINC150 benchmark: native splits + frozen 151-label space + teacher-prompt scaffold.
 
-CLINC150 (Larson et al., 2019) is a real intent-classification benchmark — 150
+CLINC150 (Larson et al., 2019) is a real intent-classification benchmark - 150
 assistant intents across 10 domains, plus an **out-of-scope (OOS)** class for queries
 that fit none. We keep its *standard* train/val/test splits (comparable to the
-literature) and fold OOS in as a 151st label — which doubles as our `escalate` signal
-("OOS ≈ escalate to a human", SPEC §4). Unlike Bitext this is a curated set, so we do
+literature) and fold OOS in as a 151st label - which doubles as our `escalate` signal
+("OOS ≈ escalate to a human", SPEC Section 4). Unlike Bitext this is a curated set, so we do
 NOT dedup/re-split; the value is using the canonical partition.
 
     uv run python -m triage_distill.data.clinc
 
 Writes data/clinc/splits/{train,val,test}.parquet, artifacts/clinc/label_space.json +
-split_manifest.json, and scaffolds prompts/teacher_clinc.md (only if absent — it's the
+split_manifest.json, and scaffolds prompts/teacher_clinc.md (only if absent - it's the
 teacher's design surface).
 """
 from __future__ import annotations
@@ -51,26 +51,26 @@ def _split_df(data: dict, in_key: str, oos_key: str) -> pd.DataFrame:
 
 def _teacher_prompt_scaffold(labels: list[str]) -> str:
     label_block = ", ".join(labels)
-    return f'''# Teacher prompt — CLINC150 (design surface)
+    return f'''# Teacher prompt - CLINC150 (design surface)
 
-**Scaffold — YOURS to refine.** I pre-filled the 151-label list (150 intents + `oos`) and
+**Scaffold - YOURS to refine.** I pre-filled the 151-label list (150 intents + `oos`) and
 the reason-before-commit skeleton, reusing the same JSON fields as `teacher.md` so the
 whole pipeline (smoke / labeling / targets / prepare) works unchanged. You own the
 reasoning design.
 
 ## DECISIONS FOR YOU
 - [ ] Group the 150 intents by their 10 domains (banking, credit_cards, travel, kitchen,
-      home, auto, work, small_talk, meta, utility) with short glosses on the confusable ones —
+      home, auto, work, small_talk, meta, utility) with short glosses on the confusable ones -
       a flat list is a weak prompt for 150 classes.
 - [ ] Add 1-2 few-shot exemplars (an in-scope one and an `oos` one).
-- [ ] Tune the OOS instruction — when should K3 prefer `oos` over a low-confidence intent?
+- [ ] Tune the OOS instruction - when should K3 prefer `oos` over a low-confidence intent?
 
 ---
 
 ## SYSTEM PROMPT
 ```text
 You are an intent classifier for a virtual assistant. Read the user query, reason
-briefly, then commit to EXACTLY ONE intent label. Think FIRST, then commit — your JSON
+briefly, then commit to EXACTLY ONE intent label. Think FIRST, then commit - your JSON
 must place the reasoning fields BEFORE "category".
 
 If the query does not clearly fit any listed intent, label it "oos" (out of scope)
@@ -88,7 +88,7 @@ Return ONLY a JSON object with these fields, in this order:
 
 Example:
 Query: "how do i get to the nearest airport"
-{{"evidence_to_intent": "They ask how to get to the airport — a request for travel directions.", "why_not_alternatives": "Not distance (they want the route, not the mileage) and not oos (it maps to a known travel intent).", "category": "directions"}}
+{{"evidence_to_intent": "They ask how to get to the airport - a request for travel directions.", "why_not_alternatives": "Not distance (they want the route, not the mileage) and not oos (it maps to a known travel intent).", "category": "directions"}}
 
 # TODO(you): add an `oos` exemplar + domain grouping, then delete this line.
 ```

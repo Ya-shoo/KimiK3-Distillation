@@ -1,8 +1,8 @@
-"""Score category predictions against gold — pure metrics, no GPU.
+"""Score category predictions against gold - pure metrics, no GPU.
 
 The headline is **macro-F1** (every intent weighted equally, so rare classes can't be
 ignored); we also report accuracy, per-class F1, and the invalid-output rate (a
-prediction that isn't valid JSON or isn't one of the 27 labels counts as WRONG — the
+prediction that isn't valid JSON or isn't one of the 27 labels counts as WRONG - the
 honest way to score a generative classifier). The student inference that produces the
 predictions runs on the 4090; this scorer runs anywhere and is reused for every
 frontier-panel model in M3, so all models are graded by identical code.
@@ -24,7 +24,7 @@ from triage_distill.datasets import cfg
 from triage_distill.schema import load_label_space
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-OOS = "oos"  # CLINC's out-of-scope class — doubles as the escalate signal (HANDOFF start-here #3)
+OOS = "oos"  # CLINC's out-of-scope class - doubles as the escalate signal (HANDOFF start-here #3)
 INVALID = "__invalid__"  # sentinel for unparseable / out-of-space predictions → always wrong
 
 

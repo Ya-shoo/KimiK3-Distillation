@@ -5,7 +5,7 @@ Mapping from Bitext columns to our task:
 - label    = Bitext `intent`   (fine-grained, ~27 classes; e.g. "get_refund")
 - coarse   = Bitext `category` (11 coarse groups; kept for analysis only)
 
-NB: the spec's output field `category` is the FINE-GRAINED `intent` here — Bitext's
+NB: the spec's output field `category` is the FINE-GRAINED `intent` here - Bitext's
 own `category` column is the coarse grouping, which we keep under `coarse`.
 """
 from __future__ import annotations

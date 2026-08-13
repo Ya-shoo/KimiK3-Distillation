@@ -1,7 +1,7 @@
 """Deterministic stratified train/val/test splits.
 
 The TEST split is sacred: it is scored by the teacher, every panel model, the
-student, and the ablation — never used for training or prompt tuning. Splits are
+student, and the ablation - never used for training or prompt tuning. Splits are
 seeded and hashed so the exact partition is reproducible and comparable.
 """
 from __future__ import annotations

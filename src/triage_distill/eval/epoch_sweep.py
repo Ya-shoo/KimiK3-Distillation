@@ -1,4 +1,4 @@
-"""Score every epoch checkpoint of a run on val — plumbing for the epochs decision.
+"""Score every epoch checkpoint of a run on val - plumbing for the epochs decision.
 
 Training with save_strategy="epoch" leaves runs/<name>/checkpoints/checkpoint-<step>/
 adapters. This sweep runs each one through the inference runner (a fresh subprocess
@@ -35,7 +35,7 @@ def _checkpoints(run_dir: Path) -> list[Path]:
     ckpts = [(int(m.group(1)), p) for p in (run_dir / "checkpoints").glob("checkpoint-*")
              if (m := re.match(r"checkpoint-(\d+)$", p.name))]
     if not ckpts:
-        raise SystemExit(f"no checkpoints under {run_dir / 'checkpoints'} — train first")
+        raise SystemExit(f"no checkpoints under {run_dir / 'checkpoints'} - train first")
     return [p for _, p in sorted(ckpts)]
 
 
@@ -85,23 +85,23 @@ def main() -> None:
             cmd += ["--limit", str(args.limit)]
         print(f"\n-- epoch {epoch} ({ckpt.name}) --")  # ASCII: subprocess stdout is cp1252 on Windows
         # Crash-resume: a completed preds file for this epoch (right row count, parseable)
-        # means inference already ran — score it without redoing ~10 min of generation.
+        # means inference already ran - score it without redoing ~10 min of generation.
         if preds_path.exists():
             try:
                 if len(_read_jsonl(preds_path)) == (args.limit or len(gold)):
-                    print(f"preds_epoch{epoch}.jsonl complete — skipping inference")
+                    print(f"preds_epoch{epoch}.jsonl complete - skipping inference")
                     cmd = None
             except Exception:
                 pass
         if cmd:
             # A CUDA process launched right after the previous one exits can die with
-            # 0xC0000005 during import (WDDM teardown race, docs/ENV-4090-WINDOWS.md) —
+            # 0xC0000005 during import (WDDM teardown race, docs/ENV-4090-WINDOWS.md) -
             # cool down before each launch and retry a crash once.
             time.sleep(8)
             try:
                 subprocess.run(cmd, cwd=REPO_ROOT, check=True)
             except subprocess.CalledProcessError:
-                print("infer crashed — retrying once after cooldown")
+                print("infer crashed - retrying once after cooldown")
                 time.sleep(30)
                 subprocess.run(cmd, cwd=REPO_ROOT, check=True)
 
@@ -138,7 +138,7 @@ def main() -> None:
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(xs, [r["macro_f1"] for r in results], marker="o", label="macro-F1")
         ax.plot(xs, [r["accuracy"] for r in results], marker="s", label="accuracy")
-        ax.set_xticks(xs); ax.set_xlabel("epoch"); ax.set_title(f"{run_dir.name} — val by epoch")
+        ax.set_xticks(xs); ax.set_xlabel("epoch"); ax.set_title(f"{run_dir.name} - val by epoch")
         ax.legend(); fig.tight_layout()
         fig.savefig(run_dir / "val_f1_by_epoch.png", dpi=120)
         print(f"-> {run_dir / 'val_f1_by_epoch.png'}")

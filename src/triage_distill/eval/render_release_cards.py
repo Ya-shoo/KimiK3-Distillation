@@ -1,12 +1,12 @@
 """Frontier-lab-style release cards (the Twitter/X launch-graphic treatment).
 
 Four dark 16:9 social cards rendered from the same committed artifacts as
-`render_charts` — big numbers, accent-vs-gray bars, footnoted eval conditions:
+`render_charts` - big numbers, accent-vs-gray bars, footnoted eval conditions:
 
-  card1_bench     — the grouped benchmark bars (student in blue, field in gray)
-  card2_headline  — the giant "104.5%" hero stat
-  card3_cost      — "$2,200 -> $25" savings bars
-  card4_scale     — the 2.8T vs 4B area-true circle visual
+  card1_bench - the grouped benchmark bars (student in blue, field in gray)
+  card2_headline - the giant "104.5%" hero stat
+  card3_cost - "$2,200 -> $25" savings bars
+  card4_scale - the 2.8T vs 4B area-true circle visual
 
     uv run python -m triage_distill.eval.render_release_cards   # -> artifacts/cards/
 """
@@ -57,7 +57,7 @@ def _save(fig, name):
 
 def card1_bench():
     fig = _fig()
-    _brand(fig, "A 4B student distilled from Kimi K3 (2.8T) — evaluated against the frontier field")
+    _brand(fig, "A 4B student distilled from Kimi K3 (2.8T), evaluated against the frontier field")
     order = ["Kimi K3 (teacher)", "Gemini 3 Flash", "GPT-5.6 Luna", "DeepSeek 3.2", "Haiku 4.5"]
     short = {"Kimi K3 (teacher)": "Kimi K3\n(teacher)", "Gemini 3 Flash": "Gemini 3\nFlash",
              "GPT-5.6 Luna": "GPT-5.6\nLuna", "DeepSeek 3.2": "DeepSeek\n3.2", "Haiku 4.5": "Haiku\n4.5"}
@@ -95,7 +95,7 @@ def card2_headline():
     _brand(fig, "A 4B student distilled from Kimi K3 (2.8T)")
     fig.text(0.5, 0.60, "104.5%", fontsize=104, fontweight="bold", color=ACCENT,
              ha="center", va="center")
-    fig.text(0.5, 0.415, "of its 2.8-trillion-parameter teacher's accuracy —\nbeating the teacher outright on both benchmarks",
+    fig.text(0.5, 0.415, "of its 2.8-trillion-parameter teacher's accuracy,\nbeating the teacher outright on both benchmarks",
              fontsize=16.5, color=INK, ha="center", va="center", linespacing=1.45)
     stats = [("99.2", "Bitext-27 · test macro-F1\n#1 of 8 systems"),
              ("92.2", "CLINC-151 · test macro-F1\nteacher: 90.8"),
@@ -132,7 +132,7 @@ def card3_cost():
     for s in ax.spines.values():
         s.set_visible(False)
     ax.tick_params(length=0)
-    fig.text(0.055, 0.80, "88× cheaper than its teacher — while outscoring it",
+    fig.text(0.055, 0.80, "88× cheaper than its teacher, while still scoring higher",
              fontsize=17, fontweight="bold", color=INK)
     _save(fig, "card3_cost")
 

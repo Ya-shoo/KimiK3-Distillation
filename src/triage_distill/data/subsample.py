@@ -10,7 +10,7 @@ like the splits) so the labeled set is reproducible. Works for any registered da
     uv run python -m triage_distill.data.subsample --dataset clinc --per-class 30
 
 Size is a methodology knob (`--per-class` / `--total`). The sacred TEST split is never
-touched — we only ever subsample TRAIN.
+touched - we only ever subsample TRAIN.
 """
 from __future__ import annotations
 

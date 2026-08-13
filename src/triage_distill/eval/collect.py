@@ -1,9 +1,9 @@
-"""Package a dataset's training runs into the git-tracked eval artifacts (HANDOFF §10/§11).
+"""Package a dataset's training runs into the git-tracked eval artifacts (HANDOFF Section 10/Section 11).
 
 `runs/` holds weights and stays off git; the Mac builds M3 + the paper from NUMBERS.
 This copies, per run, the eval outputs the paper needs into `artifacts/<dataset>/eval/`
 (epoch scores, run config, trainer loss log, per-epoch preds) and assembles
-`findings.json` — the PAPER-OUTLINE Part B log (learning curves, best epoch,
+`findings.json` - the PAPER-OUTLINE Part B log (learning curves, best epoch,
 diminishing-returns knee, train-vs-val signal, seed inventory, adjustment changelog).
 
 The changelog + caveats are prose the owner curates: pass --notes with a JSON file of
@@ -127,7 +127,7 @@ def main() -> None:
                 sc = json.loads((REPO_ROOT / "runs" / m / "epoch_scores.json").read_text())
                 row = next((e for e in sc["epochs"] if e["epoch"] == epoch), None)
                 if row is None:
-                    print(f"[groups] {fam}: {m} has no epoch {epoch} — excluded")
+                    print(f"[groups] {fam}: {m} has no epoch {epoch} - excluded")
                     continue
                 vals[m] = round(row["macro_f1"], 4)
                 if "oos" in row:

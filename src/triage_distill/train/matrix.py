@@ -5,7 +5,7 @@ full per-epoch val sweep on the primary seed (42), extra seeds scored at the pri
 seed's best epoch (held fixed), a step-matched 6-epoch ablation control on CLINC
 (1074 optimizer steps ~= recipe A's 1071), Bitext backfilled with 2 extra seeds, and
 a Bitext recipe_a s42 re-run under the fixed stage schedule (the original sawtoothed
-its LR across stages — see artifacts/eval/findings.json caveats). Student prompts are
+its LR across stages - see artifacts/eval/findings.json caveats). Student prompts are
 identical across datasets.
 
 Every training run is staged one epoch per process (the Windows VRAM-creep livelock,
@@ -49,7 +49,7 @@ SEEDS_EXTRA = (1337, 2024)
 def build_plan() -> list[dict]:
     C, B = "data/clinc/train", "data/train"
     plan = []
-    # CLINC primary seed — recipe_a first: its 357 steps/stage probes the livelock wall early.
+    # CLINC primary seed - recipe_a first: its 357 steps/stage probes the livelock wall early.
     for rec, mode in RECIPES:
         plan.append(dict(name=f"clinc_{rec}_s42", dataset="clinc", data=f"{C}/{rec}.messages.jsonl",
                          mode=mode, seed=42, epochs=3, sweep="full", best_from=None))
@@ -87,7 +87,7 @@ def log(msg: str) -> None:
 
 
 def sh(cmd: list[str], timeout_min: float, retries: int = 1) -> str:
-    """Run with a pre-launch cooldown; retry crashes once. Timeouts (livelocks) don't retry —
+    """Run with a pre-launch cooldown; retry crashes once. Timeouts (livelocks) don't retry -
     a second 45-min hang would cost more than the run is worth tonight."""
     res = "not run"
     for attempt in range(retries + 1):
@@ -108,7 +108,7 @@ def _stages_done(run_dir: Path, steps_per_epoch: int) -> int:
     """Highest completed epoch, inferred from existing checkpoint step numbers.
 
     A hard kill mid-save leaves a checkpoint whose trainer_state.json is all NULs
-    (allocated, never flushed) — HF resume would crash on it, so quarantine it.
+    (allocated, never flushed) - HF resume would crash on it, so quarantine it.
     """
     import shutil
     best = 0
@@ -117,7 +117,7 @@ def _stages_done(run_dir: Path, steps_per_epoch: int) -> int:
             try:
                 json.loads((p / "trainer_state.json").read_text(encoding="utf-8"))
             except Exception:
-                log(f"  corrupt checkpoint {p.name} (truncated save) — deleting")
+                log(f"  corrupt checkpoint {p.name} (truncated save) - deleting")
                 shutil.rmtree(p, ignore_errors=True)
                 continue
             best = max(best, int(m.group(1)) // steps_per_epoch)
@@ -127,7 +127,7 @@ def _stages_done(run_dir: Path, steps_per_epoch: int) -> int:
 def run_one(spec: dict) -> str:
     name, run_dir = spec["name"], RUNS / spec["name"]
     if (run_dir / "epoch_scores.json").exists():
-        log(f"{name}: epoch_scores.json exists — skip")
+        log(f"{name}: epoch_scores.json exists - skip")
         return "done"
 
     # --- train (staged one epoch per process) ---
@@ -148,11 +148,11 @@ def run_one(spec: dict) -> str:
             res = sh(cmd + (low if lowmem else []), TRAIN_TIMEOUT_MIN)
             if res.startswith("TIMEOUT") and not lowmem:
                 lowmem = True
-                log(f"{name}: stage {stage} livelocked at bs32x1 — retrying as bs16xga2 "
+                log(f"{name}: stage {stage} livelocked at bs32x1 - retrying as bs16xga2 "
                     "(same effective batch, half the activation VRAM)")
                 res = sh(cmd + low, TRAIN_TIMEOUT_MIN)
             if res != "ok":
-                log(f"{name}: stage {stage} FAILED ({res}) — run abandoned")
+                log(f"{name}: stage {stage} FAILED ({res}) - run abandoned")
                 return f"train stage {stage}: {res}"
 
     # --- sweep ---
@@ -161,7 +161,7 @@ def run_one(spec: dict) -> str:
     if spec["sweep"] == "best":
         anchor = RUNS / spec["best_from"] / "epoch_scores.json"
         if not anchor.exists():
-            log(f"{name}: anchor {spec['best_from']} has no epoch_scores.json — skip sweep")
+            log(f"{name}: anchor {spec['best_from']} has no epoch_scores.json - skip sweep")
             return "no anchor"
         cmd += ["--only-epoch", str(json.loads(anchor.read_text())["best_epoch"])]
     res = sh(cmd, SWEEP_TIMEOUT_MIN[spec["mode"]])
