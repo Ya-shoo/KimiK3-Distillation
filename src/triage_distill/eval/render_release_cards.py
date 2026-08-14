@@ -93,9 +93,9 @@ def card1_bench():
 def card2_headline():
     fig = _fig()
     _brand(fig, "A 4B student distilled from Kimi K3")
-    fig.text(0.5, 0.605, "1%", fontsize=112, fontweight="bold", color=ACCENT,
+    fig.text(0.5, 0.585, "1% the cost", fontsize=86, fontweight="bold", color=ACCENT,
              ha="center", va="center")
-    fig.text(0.5, 0.415, "of its 2.8-trillion-parameter teacher's serving cost,\nfor the same triage accuracy on held-out tests",
+    fig.text(0.5, 0.40, "of its 2.8-trillion-parameter teacher,\nfor the same triage accuracy on held-out tests",
              fontsize=16.5, color=INK, ha="center", va="center", linespacing=1.45)
     stats = [("99.2", "Bitext-27 · test macro-F1\n#1 of 8 systems"),
              ("92.2", "CLINC-151 · test macro-F1\nteacher: 90.8"),
