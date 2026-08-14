@@ -92,10 +92,10 @@ def card1_bench():
 
 def card2_headline():
     fig = _fig()
-    _brand(fig, "A 4B student distilled from Kimi K3 (2.8T)")
-    fig.text(0.5, 0.60, "104.5%", fontsize=104, fontweight="bold", color=ACCENT,
+    _brand(fig, "A 4B student distilled from Kimi K3")
+    fig.text(0.5, 0.60, "matches", fontsize=88, fontweight="bold", color=ACCENT,
              ha="center", va="center")
-    fig.text(0.5, 0.415, "of its 2.8-trillion-parameter teacher's accuracy,\nbeating the teacher outright on both benchmarks",
+    fig.text(0.5, 0.415, "its 2.8-trillion-parameter teacher's triage accuracy,\nat about 1% of the cost",
              fontsize=16.5, color=INK, ha="center", va="center", linespacing=1.45)
     stats = [("99.2", "Bitext-27 · test macro-F1\n#1 of 8 systems"),
              ("92.2", "CLINC-151 · test macro-F1\nteacher: 90.8"),
@@ -132,7 +132,7 @@ def card3_cost():
     for s in ax.spines.values():
         s.set_visible(False)
     ax.tick_params(length=0)
-    fig.text(0.055, 0.80, "88× cheaper than its teacher, while still scoring higher",
+    fig.text(0.055, 0.80, "88× cheaper than its teacher, at matching accuracy",
              fontsize=17, fontweight="bold", color=INK)
     _save(fig, "card3_cost")
 
