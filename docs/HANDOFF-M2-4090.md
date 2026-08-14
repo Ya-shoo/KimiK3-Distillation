@@ -152,7 +152,7 @@ trained adapter ──► inference runner (val_eval) ──► preds.jsonl ─�
 - `src/triage_distill/train/prepare.py` - data prep + the student `SYS_*` prompts (owner's knob).
 - `src/triage_distill/eval/score.py` - the scorer (students now, panel in M3).
 - `data/label/targets/` - gold-gated A/B/ablation targets (committed). `data/label/labeled.jsonl` - full K3 output incl. archived reasoning traces.
-- *(The Claude project memory that informed this - `project-overview` / `collaboration-model` / `m1-teacher-labeling` - lives on the **dev Mac**, not in the repo. Everything load-bearing from it is inlined above, so this doc stands alone.)*
+- *(The project notes that informed this - project overview, working model, and M1 teacher-labeling - live on the **dev Mac**, not in the repo. Everything load-bearing from them is inlined above, so this doc stands alone.)*
 
 ## 10. Sending results back to the dev Mac (GitHub round-trip)
 The Mac continues to **M3** (frontier panel + accuracy-vs-cost chart) from your **numbers**, not your
